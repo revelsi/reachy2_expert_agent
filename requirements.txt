@@ -1,0 +1,7 @@
+requests
+beautifulsoup4
+langchain
+gradio
+transformers
+torch
+sentence-transformers 

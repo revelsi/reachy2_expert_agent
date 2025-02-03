@@ -1,0 +1,15 @@
+Progress Summary:
+
+1. Updated the scraping script (scripts/scrape_api_docs.py) to remove unwanted elements:
+   - Removed labels and anchors with 'view source'.
+   - Additionally removed any elements with the class 'pdoc-code codehilite'.
+
+2. Modified the script to treat each <div> within a section as a separate chunk, prepending any <h1> header if available.
+
+3. Extended the functionality to scrape two URLs:
+   - https://pollen-robotics.github.io/reachy2-sdk/reachy2_sdk/reachy_sdk.html
+   - https://pollen-robotics.github.io/reachy2-sdk/reachy2_sdk.html
+   Each Document object is tagged with the source URL prefixed with '@'.
+
+Next Step:
+Begin a new task. Please let me know the details of the new task, or further adjustments you'd like to make. 
