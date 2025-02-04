@@ -40,13 +40,16 @@ def run_test_queries(db: VectorStore, embedding_generator: EmbeddingGenerator):
             # Get results
             results = collection.query(
                 query_embeddings=[query_embedding],
-                n_results=2,
+                n_results=3,
                 include=["documents", "metadatas", "distances"]
             )
             
-            # Print results
+            # Print results with document hashes as IDs
             for i in range(len(results["documents"][0])):
-                print(f"\nMatch {i+1} (distance: {results['distances'][0][i]:.3f}):")
+                doc_hash = f"doc_{hash(results['documents'][0][i])}_0"  # Create a reproducible ID
+                print(f"\nResult {i+1}:")
+                print(f"Document Hash: {doc_hash}")
+                print(f"Distance: {results['distances'][0][i]:.3f}")
                 print(f"Content: {results['documents'][0][i][:200]}...")
                 print(f"Metadata: {results['metadatas'][0][i]}")
                 print("-" * 30)

@@ -1,53 +1,155 @@
 import chromadb
 from chromadb.config import Settings
 import os
+import tempfile
 from typing import List, Dict, Optional
+import numpy as np
+import shutil
 
 class VectorStore:
     def __init__(self, persist_directory: str = "vectorstore"):
-        """Initialize ChromaDB with persistence."""
+        """Initialize the vector store with persistence."""
         self.persist_directory = persist_directory
-        os.makedirs(persist_directory, exist_ok=True)
         
-        self.client = chromadb.PersistentClient(path=persist_directory)
-    
-    def get_or_create_collection(self, name: str):
-        """Get an existing collection or create a new one."""
-        return self.client.get_or_create_collection(name=name)
-    
-    def add_documents(self, 
-                     collection_name: str,
-                     texts: List[str],
-                     embeddings: List[List[float]],
-                     metadatas: List[Dict],
-                     ids: List[str]):
-        """
-        Add documents to a collection.
-        If the collection doesn't exist, it will be created.
-        """
-        collection = self.get_or_create_collection(collection_name)
+        # Create a temporary directory for the database
+        self.temp_dir = tempfile.mkdtemp()
+        print(f"Using temporary directory: {self.temp_dir}")
         
-        # Add documents in batches to avoid memory issues
-        batch_size = 100
-        for i in range(0, len(texts), batch_size):
-            end_idx = min(i + batch_size, len(texts))
-            collection.add(
-                embeddings=embeddings[i:end_idx],
-                documents=texts[i:end_idx],
-                metadatas=metadatas[i:end_idx],
-                ids=ids[i:end_idx]
+        # Initialize client with temporary directory
+        self.client = chromadb.PersistentClient(path=self.temp_dir)
+        
+        # If the persist directory exists, try to copy its contents
+        if os.path.exists(persist_directory):
+            try:
+                shutil.copytree(persist_directory, self.temp_dir, dirs_exist_ok=True)
+                print(f"Copied existing database from {persist_directory}")
+            except Exception as e:
+                print(f"Warning: Could not copy existing database: {e}")
+
+    def cleanup(self):
+        """Clean up the vectorstore directory completely."""
+        print(f"Cleaning up vectorstore directory")
+        
+        try:
+            # Delete all collections first
+            for collection in self.client.list_collections():
+                print(f"Deleting collection: {collection.name}")
+                self.client.delete_collection(collection.name)
+            
+            # Close the client connection
+            del self.client
+            
+            # Remove the temporary directory
+            if os.path.exists(self.temp_dir):
+                shutil.rmtree(self.temp_dir)
+                print(f"Removed temporary directory")
+            
+            # Create a new temporary directory
+            self.temp_dir = tempfile.mkdtemp()
+            print(f"Created new temporary directory: {self.temp_dir}")
+            
+        except Exception as e:
+            print(f"Warning during cleanup: {e}")
+        
+        # Reinitialize the client with a fresh directory
+        self.client = chromadb.PersistentClient(path=self.temp_dir)
+        print("Initialized fresh vectorstore")
+
+    def save(self):
+        """Save the current state to the persist directory."""
+        try:
+            # Close the client connection
+            del self.client
+            
+            # Remove old persist directory if it exists
+            if os.path.exists(self.persist_directory):
+                shutil.rmtree(self.persist_directory)
+            
+            # Copy temporary directory to persist directory
+            shutil.copytree(self.temp_dir, self.persist_directory)
+            print(f"Saved database to {self.persist_directory}")
+            
+            # Reinitialize client with temporary directory
+            self.client = chromadb.PersistentClient(path=self.temp_dir)
+            
+        except Exception as e:
+            print(f"Warning during save: {e}")
+            # Reinitialize client in case of error
+            self.client = chromadb.PersistentClient(path=self.temp_dir)
+
+    def __del__(self):
+        """Cleanup temporary directory on object destruction."""
+        try:
+            if hasattr(self, 'client'):
+                del self.client
+            if hasattr(self, 'temp_dir') and os.path.exists(self.temp_dir):
+                shutil.rmtree(self.temp_dir)
+        except Exception:
+            pass
+
+    def get_collection_with_dimension_check(self, name: str, embedding_function):
+        """Get or create a collection with dimension checking and auto-recreation if needed."""
+        try:
+            # Try to get existing collection
+            collection = self.client.get_collection(name=name)
+            
+            # Test dimensionality with a dummy embedding
+            dummy_text = "test"
+            dummy_embedding = embedding_function([dummy_text])
+            expected_dim = len(dummy_embedding[0])
+            
+            # Try a dummy query to check if dimensions match
+            try:
+                collection.query(
+                    query_texts=[dummy_text],
+                    n_results=1
+                )
+                return collection
+            except chromadb.errors.InvalidDimensionException:
+                print(f"Recreating collection '{name}' due to dimension mismatch...")
+                
+                # Delete and recreate collection
+                self.client.delete_collection(name)
+                new_collection = self.client.create_collection(
+                    name=name,
+                    embedding_function=embedding_function
+                )
+                return new_collection
+                
+        except chromadb.errors.InvalidCollectionException:
+            # Collection doesn't exist, create new one
+            return self.client.create_collection(
+                name=name,
+                embedding_function=embedding_function
             )
+
+    def add_documents(self, collection_name: str, texts: List[str], metadatas: List[Dict], ids: List[str], embedding_function):
+        """Add documents to a collection, recreating it if dimensions don't match."""
+        # Get or create collection with dimension checking
+        collection = self.get_collection_with_dimension_check(
+            name=collection_name,
+            embedding_function=embedding_function
+        )
+        
+        # Add documents
+        collection.add(
+            documents=texts,
+            metadatas=metadatas,
+            ids=ids
+        )
     
     def query_collection(self,
                         collection_name: str,
                         query_texts: List[str],
                         n_results: int = 5,
-                        where: Optional[Dict] = None) -> List[Dict]:
-        """
-        Query the collection with the given texts and optional filters.
-        Returns the n_results most similar documents for each query.
-        """
-        collection = self.get_or_create_collection(collection_name)
+                        where: Optional[Dict] = None,
+                        embedding_function=None) -> List[Dict]:
+        """Query the collection with the given texts and optional filters."""
+        collection = self.client.get_collection(collection_name)
+        
+        # If embedding function is provided, use it for this query
+        if embedding_function:
+            collection._embedding_function = embedding_function
         
         # If where filter is provided, use it
         if where:

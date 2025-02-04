@@ -1,0 +1,40 @@
+
+=== Retrieval Evaluation Summary ===
+
+Average Metrics by Collection:
+--------------------------------------------------------------------------------
+Collection           Precision@5  Recall@5     MRR          nDCG@5      
+--------------------------------------------------------------------------------
+api_docs                   0.133       0.167       0.333       0.268
+reachy2_sdk                0.467       0.667       0.750       0.593
+reachy2_tutorials          0.133       0.167       0.444       0.179
+
+Per-Query Results:
+--------------------------------------------------------------------------------
+
+Query: How to move Reachy's arm?
+----------------------------------------
+api_docs:
+  P@5: 0.000, R@5: 0.000, MRR: 0.000, nDCG@5: 0.000
+reachy2_sdk:
+  P@5: 0.600, R@5: 0.750, MRR: 1.000, nDCG@5: 0.689
+reachy2_tutorials:
+  P@5: 0.200, R@5: 0.250, MRR: 1.000, nDCG@5: 0.432
+
+Query: What is the camera API?
+----------------------------------------
+api_docs:
+  P@5: 0.400, R@5: 0.500, MRR: 1.000, nDCG@5: 0.803
+reachy2_sdk:
+  P@5: 0.200, R@5: 0.250, MRR: 0.250, nDCG@5: 0.091
+reachy2_tutorials:
+  P@5: 0.200, R@5: 0.250, MRR: 0.333, nDCG@5: 0.106
+
+Query: How to control the gripper?
+----------------------------------------
+api_docs:
+  P@5: 0.000, R@5: 0.000, MRR: 0.000, nDCG@5: 0.000
+reachy2_sdk:
+  P@5: 0.600, R@5: 1.000, MRR: 1.000, nDCG@5: 1.000
+reachy2_tutorials:
+  P@5: 0.000, R@5: 0.000, MRR: 0.000, nDCG@5: 0.000

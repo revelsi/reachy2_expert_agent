@@ -32,3 +32,22 @@ Begin a new task. Please let me know the details of the new task, or further adj
   * All documents use LangChain Document format
   * Rich metadata for better context
   * JSON storage in external_docs/Codebase/ 
+
+Progress Log - Updated on 2023-10-05
+
+- Standardized on all-roberta-large-v1 (RoBERTa) as the default embedding model.
+- Updated utils/embedding_utils.py to include a ChromaEmbeddingFunction wrapper for compatibility with ChromaDB.
+- Fixed metadata cleaning in embedding_utils to ensure JSON-serializability and ChromaDB compatibility (e.g., converting None to empty string).
+- Revised utils/db_utils.py to improve VectorStore operations:
+   - Added cleanup functionality to remove old collections and temporary directories.
+   - Implemented get_collection_with_dimension_check to handle dimension mismatches.
+   - Ensured proper document deduplication when adding documents.
+- Refactored scripts/update_vectordb.py to simplify the process of updating the vector store with JSON documents.
+- Revamped scripts/evaluate_retrieval.py:
+   - Simplified test queries with updated relevance judgments based on document content.
+   - Improved metric calculations (precision, recall, MRR, nDCG).
+- Overall, the retrieval pipeline is now cleaner, more robust, and yields meaningful evaluation metrics.
+
+Future Improvements:
+- Further tuning of relevance matching criteria for evaluation.
+- Additional logging for deeper diagnostics. 

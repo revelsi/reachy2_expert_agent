@@ -1,0 +1,40 @@
+
+=== Retrieval Evaluation Summary ===
+
+Average Metrics by Collection:
+--------------------------------------------------------------------------------
+Collection           Precision@5  Recall@5     MRR          nDCG@5      
+--------------------------------------------------------------------------------
+reachy2-tutorials          0.000       0.000       0.000       0.000
+api_docs                   0.000       0.000       0.000       0.000
+reachy2-sdk                0.000       0.000       0.000       0.000
+
+Per-Query Results:
+--------------------------------------------------------------------------------
+
+Query: How to move Reachy's arm?
+----------------------------------------
+reachy2-tutorials:
+  P@5: 0.000, R@5: 0.000, MRR: 0.000, nDCG@5: 0.000
+api_docs:
+  P@5: 0.000, R@5: 0.000, MRR: 0.000, nDCG@5: 0.000
+reachy2-sdk:
+  P@5: 0.000, R@5: 0.000, MRR: 0.000, nDCG@5: 0.000
+
+Query: What is the camera API?
+----------------------------------------
+reachy2-tutorials:
+  P@5: 0.000, R@5: 0.000, MRR: 0.000, nDCG@5: 0.000
+api_docs:
+  P@5: 0.000, R@5: 0.000, MRR: 0.000, nDCG@5: 0.000
+reachy2-sdk:
+  P@5: 0.000, R@5: 0.000, MRR: 0.000, nDCG@5: 0.000
+
+Query: How to control the gripper?
+----------------------------------------
+reachy2-tutorials:
+  P@5: 0.000, R@5: 0.000, MRR: 0.000, nDCG@5: 0.000
+api_docs:
+  P@5: 0.000, R@5: 0.000, MRR: 0.000, nDCG@5: 0.000
+reachy2-sdk:
+  P@5: 0.000, R@5: 0.000, MRR: 0.000, nDCG@5: 0.000
