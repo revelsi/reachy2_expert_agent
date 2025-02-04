@@ -1,8 +1,8 @@
-# Reachy2 Expert Safer
+# Reachy2 Expert Agent
 
 ## Overview
 
-Reachy2 Expert Safer is a project designed to centralize and streamline various resources and examples for the Reachy2 platform. The project gathers materials from different repositories to provide a one-stop-shop for:
+Reachy2 Expert Agent is a project designed to centralize and streamline various resources and examples for the Reachy2 platform. The project gathers materials from different repositories to provide a one-stop-shop for:
 
 - **Tutorials:** Notebook examples from the Reachy2 Tutorials repository, which guide users through various functionalities of Reachy2.
 - **SDK Examples:** Code examples and scripts from the Reachy2 SDK repository, showing how to interface with and control Reachy2.
