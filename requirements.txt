@@ -4,4 +4,5 @@ langchain
 gradio
 transformers
 torch
-sentence-transformers 
+sentence-transformers
+chromadb 
