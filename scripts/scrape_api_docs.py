@@ -1,6 +1,10 @@
+import sys, os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import requests
 from bs4 import BeautifulSoup
 from langchain.docstore.document import Document
+from utils.doc_utils import save_documents_to_json
 
 def fetch_reachy_sdk_api(url):
     """
@@ -108,6 +112,12 @@ def main():
     for i, doc in enumerate(all_documents):
         print(f"\n--- Chunk {i + 1} ---", flush=True)
         print(doc.page_content, flush=True)
+
+    output_dir = os.path.join("external_docs", "Codebase")
+    os.makedirs(output_dir, exist_ok=True)
+    output_file = os.path.join(output_dir, "api_docs.json")
+    save_documents_to_json(all_documents, output_file)
+    print(f"Saved {len(all_documents)} API doc chunks to {output_file}", flush=True)
 
 if __name__ == "__main__":
     main()

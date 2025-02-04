@@ -12,4 +12,23 @@ Progress Summary:
    Each Document object is tagged with the source URL prefixed with '@'.
 
 Next Step:
-Begin a new task. Please let me know the details of the new task, or further adjustments you'd like to make. 
+Begin a new task. Please let me know the details of the new task, or further adjustments you'd like to make.
+
+2024-01-17: Major refactoring of document processing pipeline
+- Created utils/ package with specialized modules:
+  * code_utils.py: AST-based parsing of Python files into meaningful chunks
+  * notebook_utils.py: Proper notebook cell extraction with context
+  * doc_utils.py: Common document handling utilities
+- Improved chunking strategy:
+  * Removed basic text-based chunking in favor of semantic chunking
+  * Code files now split by functions/classes with preserved docstrings
+  * Notebooks split by cells with proper section tracking
+  * API docs maintain their natural document structure
+- Cleaned up project structure:
+  * Removed redundant Pollen Vision scraper
+  * Added clean target to Makefile for fresh starts
+  * Organized utilities into proper Python package
+- Output is now standardized:
+  * All documents use LangChain Document format
+  * Rich metadata for better context
+  * JSON storage in external_docs/Codebase/ 

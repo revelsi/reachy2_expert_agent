@@ -1,8 +1,11 @@
 #!/usr/bin/env python
-import os
-import sys
+import sys, os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import subprocess
-import shutil
+from utils.doc_utils import save_documents_to_json
+from utils.code_utils import process_python_file
+from utils.notebook_utils import process_notebook
 
 # URL of the Reachy2 SDK repository
 GIT_URL = "https://github.com/pollen-robotics/reachy2-sdk.git"
@@ -12,9 +15,6 @@ REPO_DIR = os.path.join("external_docs", "reachy2_sdk_repo")
 
 # Source directory: In reachy2-sdk, look in src/examples (which contains both .py and .ipynb files)
 SOURCE_DIR = os.path.join(REPO_DIR, "src", "examples")
-
-# Destination directory: store Reachy2 SDK files in its own subfolder
-DEST_DIR = os.path.join("external_docs", "Codebase", "reachy2-sdk")
 
 def clone_or_update_repo():
     """
@@ -27,39 +27,44 @@ def clone_or_update_repo():
         print("Repository already cloned. Pulling latest changes...")
         subprocess.run(["git", "-C", REPO_DIR, "pull"], check=True)
 
-def copy_code_files():
+def extract_code_documents():
     """
-    Copies all .py and .ipynb files from the SOURCE_DIR (src/examples)
-    into DEST_DIR. Only the dedicated destination folder for this repo is removed.
+    Process all Python files and notebooks in the source directory into meaningful chunks.
     """
     if not os.path.exists(SOURCE_DIR):
         print(f"Source directory not found: {SOURCE_DIR}")
         sys.exit(1)
-        
-    if os.path.exists(DEST_DIR):
-        shutil.rmtree(DEST_DIR)
-        print(f"Removed old folder at {DEST_DIR}")
-    os.makedirs(DEST_DIR, exist_ok=True)
     
+    all_docs = []
     files = os.listdir(SOURCE_DIR)
-    count = 0
+    
     for file in files:
-        if file.endswith(".py") or file.endswith(".ipynb"):
-            src_path = os.path.join(SOURCE_DIR, file)
-            dst_path = os.path.join(DEST_DIR, file)
-            print(f"Copying {src_path} to {dst_path}")
-            shutil.copy2(src_path, dst_path)
-            count += 1
-
-    if count == 0:
-        print("No Python or Notebook files found in the source directory.")
-    else:
-        print(f"Copied {count} file(s).")
+        file_path = os.path.join(SOURCE_DIR, file)
+        
+        if file.endswith(".py"):
+            print(f"Processing Python file {file}")
+            docs = process_python_file(file_path, file)
+            all_docs.extend(docs)
+            print(f"Extracted {len(docs)} chunks from {file}")
+            
+        elif file.endswith(".ipynb"):
+            print(f"Processing notebook {file}")
+            docs = process_notebook(file_path, file)
+            all_docs.extend(docs)
+            print(f"Extracted {len(docs)} chunks from {file}")
+    
+    return all_docs
 
 def main():
     clone_or_update_repo()
-    copy_code_files()
-    print("\nAll Reachy2 SDK code files have been successfully stored in external_docs/Codebase/reachy2-sdk.")
+    docs = extract_code_documents()
+    
+    output_dir = os.path.join("external_docs", "Codebase")
+    os.makedirs(output_dir, exist_ok=True)
+    output_file = os.path.join(output_dir, "reachy2-sdk.json")
+    
+    save_documents_to_json(docs, output_file)
+    print(f"Saved {len(docs)} code chunks to {output_file}")
 
 if __name__ == "__main__":
     main()
