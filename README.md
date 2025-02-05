@@ -1,63 +1,117 @@
 # Reachy2 Expert Agent
 
+A retrieval-based expert system for Reachy2 robot documentation and code examples.
+
 ## Overview
 
-Reachy2 Expert Agent is a project designed to centralize and streamline various resources and examples for the Reachy2 platform. The project gathers materials from different repositories to provide a one-stop-shop for:
+This system creates and maintains a semantic search index over Reachy2's documentation, tutorials, and SDK examples. It uses a two-stage pipeline for document processing and the InstructorXL model for generating embeddings.
 
-- **Tutorials:** Notebook examples from the Reachy2 Tutorials repository, which guide users through various functionalities of Reachy2.
-- **SDK Examples:** Code examples and scripts from the Reachy2 SDK repository, showing how to interface with and control Reachy2.
-- **Vision Scripts:** Python scripts from the Pollen Vision repository, focusing on vision and image processing for Reachy2.
+## Pipeline Structure
 
-## How It Works
+1. **Scraping Stage**
+   - Fetches raw documents from multiple sources:
+     * Reachy2 Tutorials (Jupyter notebooks)
+     * Reachy2 SDK examples (Python files and notebooks)
+     * API documentation (HTML)
+   - Raw files are stored in `raw_docs/` directory
 
-This project uses automated Python scripts located in the `scripts/` directory to manage the repositories:
+2. **Chunking Stage**
+   - Processes raw documents using source-specific strategies:
+     * Tutorial notebooks: Preserves narrative flow from markdown cells
+     * SDK files: Specialized handling for code and documentation
+     * API docs: Structured extraction of documentation sections
+   - Outputs JSON files with LangChain Document objects in `external_docs/documents/`
 
-1. **Cloning/Updating Repositories:** Each script checks if the respective repository is already cloned. If not, it clones the repository. If it exists, it pulls the latest changes.
-2. **Refreshing Content:** The scripts copy notebooks and code files into the `external_docs/Codebase` directory. Running `make refresh` executes all these scripts in sequence.
+3. **Vector Database**
+   - Uses ChromaDB for storing document embeddings
+   - Implements InstructorXL model for high-quality embeddings
+   - Supports semantic search across all document collections
 
-## Setup
+## Installation
 
-Follow these steps to get started:
+1. Create and activate a virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
 
-1. **Set Up a Virtual Environment:**
-   - On macOS/Linux:
-     ```bash
-     python3 -m venv venv
-     source venv/bin/activate
-     ```
-   - On Windows:
-     ```bash
-     python -m venv venv
-     venv\Scripts\activate
-     ```
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
 
-2. **Install Dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+## Usage
 
-3. **Refresh the Repositories:**
-   Run the following command to update all resources:
-   ```bash
-   make refresh
-   ```
+### Complete Pipeline Refresh
+To run the complete pipeline (clean → scrape → chunk → update vector store):
+```bash
+make refresh
+```
 
-## Troubleshooting
+### Individual Steps
+You can also run individual stages:
 
-- **Network Issues:** If you encounter errors during cloning (e.g., HTTP/2 RPC errors), retry the command or force Git to use HTTP/1.1 with:
-  ```bash
-  git config --global http.version HTTP/1.1
-  ```
+1. Clean all directories:
+```bash
+make clean
+```
 
-- **Repository Structure:** Ensure that the repository URLs and expected folder structures haven't changed. The scripts rely on folders like `src/examples` for the SDK repository.
+2. Scrape raw documents:
+```bash
+make scrape
+```
+
+3. Process documents into chunks:
+```bash
+make chunk
+```
+
+4. Update vector store:
+```bash
+make update_vectordb
+```
+
+### Testing and Evaluation
+
+1. Run evaluation metrics:
+```bash
+python scripts/evaluate_retrieval.py --debug
+```
+
+2. Test specific queries:
+```bash
+python scripts/test_queries.py
+```
+
+## Directory Structure
+
+```
+.
+├── raw_docs/                  # Raw documents from scraping
+│   ├── api_docs/             # Raw HTML files
+│   ├── reachy2_tutorials/    # Raw notebook files
+│   └── reachy2_sdk/          # Raw Python and notebook files
+├── external_docs/
+│   └── documents/           # Processed JSON documents
+├── scripts/
+│   ├── scrape_*.py          # Scraping scripts
+│   ├── chunk_documents.py   # Document processing
+│   └── evaluate_*.py        # Evaluation scripts
+├── utils/                    # Utility modules
+├── vectorstore/             # ChromaDB storage
+└── requirements.txt
+```
 
 ## Contributing
 
-Contributions are welcome! If you have suggestions or improvements, please open an issue or submit a pull request.
+When modifying the codebase:
+1. Each source type (tutorials, SDK, API docs) has its own chunking strategy
+2. Changes to chunking strategies should be made in `chunk_documents.py`
+3. Run evaluation scripts to ensure retrieval quality
 
 ## License
 
-[Specify your license here, e.g., MIT License]
+[Add your license information here]
 
 ## Contact
 

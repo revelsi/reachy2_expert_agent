@@ -32,7 +32,7 @@ def main():
         "How can I make Reachy pick up an object?"
     ]
     
-    collections = ["reachy2-tutorials", "reachy2-sdk", "api_docs"]
+    collections = ["reachy2_tutorials", "reachy2_sdk", "api_docs"]
     
     with open("test_queries_output.txt", "w") as output_file:
         for query in test_queries:

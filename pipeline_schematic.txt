@@ -1,0 +1,92 @@
+Pipeline Schematic of the Retrieval Pipeline
+============================================
+
+1. MAKE REFRESH
+----------------
+- Command: make refresh
+- This target in the Makefile orchestrates the complete pipeline:
+  • First cleans directories (clean)
+  • Then scrapes raw documents (scrape)
+  • Processes raw documents into chunks (chunk)
+  • Finally updates the vector store (update_vectordb)
+
+2. CLEANING – Directories
+-----------------------------
+- The 'clean' target in the Makefile:
+  • Removes all files from external_docs/*
+  • Removes all files from raw_docs/*
+  • Recreates necessary subdirectories (external_docs/documents and raw_docs)
+
+3. DATA SCRAPING (Stage 1)
+--------------------------
+- Three independent scraping scripts store raw files in raw_docs/:
+  • scrape_notebooks.py: Clones/pulls reachy2-tutorials repository
+    - Stores raw .ipynb files in raw_docs/reachy2_tutorials/
+  • scrape_reachy2sdk.py: Clones/pulls reachy2-sdk repository
+    - Stores raw .py and .ipynb files in raw_docs/reachy2_sdk/
+  • scrape_api_docs.py: Fetches ReachySDK API documentation
+    - Stores raw HTML files in raw_docs/api_docs/
+
+4. DOCUMENT CHUNKING (Stage 2)
+------------------------------
+- Script: chunk_documents.py processes raw files into meaningful chunks
+- Source-specific chunking strategies:
+  • For tutorials (.ipynb):
+    - Focus on markdown cells
+    - Preserve narrative flow
+    - Split with overlap if needed
+  • For SDK files:
+    - .py files: Split on logical boundaries (functions/classes)
+    - .ipynb: Handle code and markdown cells separately
+  • For API docs (HTML):
+    - Extract main content
+    - Split by sections with headers
+- Outputs JSON files with LangChain Documents in external_docs/documents/
+
+5. UPDATE VECTOR DATABASE
+---------------------------
+- Script: update_vectordb.py
+  • Initializes VectorStore with temporary directory
+  • Calls cleanup() to remove any previous collections
+  • Instantiates EmbeddingGenerator with InstructorXL model
+  • Loads JSON documents and adds to corresponding collections
+  • Saves the updated database to persistent storage
+
+6. VECTOR STORE (CHROMADB)
+---------------------------
+- Manages collections of documents with their embeddings
+- Uses temporary directories for safe updates
+- Performs dimension checks when switching models
+- Saves to persistent storage after updates
+
+7. EMBEDDING GENERATION
+-----------------------
+- Uses InstructorXL model ("hkunlp/instructor-xl")
+- Generates embeddings for both indexing and querying
+- Wrapped in ChromaEmbeddingFunction for ChromaDB compatibility
+
+8. EVALUATION & QUERY EXECUTION
+--------------------------------
+Two main evaluation scripts:
+• evaluate_retrieval.py:
+  - Runs test queries with known relevant documents
+  - Computes metrics (Precision, Recall, MRR, nDCG)
+  - Prints detailed evaluation summary
+• test_queries.py:
+  - Executes additional test queries
+  - Writes results to test_queries_output.txt
+  - Helps verify retrieval quality
+
+Summary
+=======
+The pipeline now clearly separates:
+1. Data acquisition (scraping raw files)
+2. Document processing (source-specific chunking)
+3. Vector store management (with InstructorXL embeddings)
+4. Evaluation and testing
+
+This separation allows for:
+- Better debugging and maintenance
+- Source-specific document handling
+- Independent optimization of each stage
+- Clearer evaluation of changes 

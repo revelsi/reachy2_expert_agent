@@ -130,10 +130,13 @@ def main():
     if args.debug:
         print("Checking collection sizes:")
         print("-" * 50)
-        for collection_name in ["api_docs", "reachy2-sdk", "reachy2-tutorials"]:
-            collection = db.client.get_collection(collection_name)
-            count = collection.count()
-            print(f"{collection_name}: {count} documents")
+        for collection_name in ["api_docs", "reachy2_sdk", "reachy2_tutorials"]:
+            try:
+                collection = db.client.get_collection(collection_name)
+                count = collection.count()
+                print(f"{collection_name}: {count} documents")
+            except Exception as e:
+                print(f"Could not get collection {collection_name}: {e}")
         print()
     
     print("Starting evaluation...\n")

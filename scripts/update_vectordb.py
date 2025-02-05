@@ -38,16 +38,16 @@ def main():
     db = VectorStore(persist_directory="vectorstore")
     embedding_generator = EmbeddingGenerator(model_name="hkunlp/instructor-xl")
     
-    print("\nInitializing vector store with RoBERTa embeddings...")
+    print("\nInitializing vector store with InstructorXL embeddings...")
     
     # Clean up existing vectorstore
     db.cleanup()
     
     # Process each JSON file
     for filepath in [
-        "external_docs/Codebase/reachy2-tutorials.json",
-        "external_docs/Codebase/reachy2-sdk.json",
-        "external_docs/Codebase/api_docs.json"
+        "external_docs/documents/reachy2_tutorials.json",
+        "external_docs/documents/reachy2_sdk.json",
+        "external_docs/documents/api_docs.json"
     ]:
         process_json_file(filepath, db, embedding_generator)
     
