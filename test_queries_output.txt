@@ -4,49 +4,49 @@ Query: How do I control the robot's head?
 Results from reachy2-tutorials:
 --------------------------------------------------------------------------------
 
-Document (distance: 0.734):
-Content: Perfect, we made it ! 
+Document (distance: 0.357):
+Content: Notice that the head will move up and down in a short range. If you want to make the head move in a larger range, just change the value of the z-coordinate in the look_at method.
 
-But as you can see, Reachy seems a bit sad, keeping its head still. We will add a head movement for Reachy to look at the fruit it wants to catch. 
-We use the method *forward_k...
+Here, the parameter ...
 
-Document (distance: 0.870):
-Content: Make the robot move now : 
+Document (distance: 0.357):
+Content: ## 5. Final tips
 
-Document (distance: 0.951):
-Content: Now, you can send the command to the robot and make it move : 
+Now, you've learned how to build a sequence on Reachy using only the SDK Client with: 
+- head movements
+- arms movements
+- synchronization between Reachy's parts
+
+You can now use thi...
+
+Document (distance: 0.366):
+Content: #### 4.3.3. Arms swinging and end effector tracking
+
+Now, we want Reachy to lift its arms, move them one by one and follow the effector of the moving arm with its head.
+
+This part is a bit more comple...
 --------------------------------------------------------------------------------
 
 Results from reachy2-sdk:
 --------------------------------------------------------------------------------
 
-Document (distance: 0.905):
-Content: As you can see, the head is composed of **three joints**:
-- neck.roll
-- neck.pitch
-- neck.yaw
+Document (distance: 0.283):
+Content: ReachySDK for Reachy 2 offers you methods to make movements with the arms and head, controlling the target position in several ways, choosing the duration of the movement, or even the interpolation mo...
 
-All joints belong to the same Orbita3D actuator, referred to as the **neck**.
+Document (distance: 0.343):
+Content: There are several ways to control the head movements:
+- using the `look_at()`, `goto` and `rotate_by` methods, called directly at the **head** level. These methods work as in the [goto_introduction](2...
 
-To start, we need to turn ...
+Document (distance: 0.357):
+Content: ### look_at()
 
-Document (distance: 0.925):
-Content: reachy.head.rotate_by(roll=0, pitch=0, yaw=20, frame='head')
-
-reachy.head.rotate_by(roll=-30, pitch=0, yaw=0, frame='robot')
-
-Document (distance: 0.929):
-Content: #### In cartesian space
-
-You can control the head with a quaternion, in cartesian space.
-
-You can use [pyquaternion library](https://kieranwynn.github.io/pyquaternion/) to create suitable quaternion f...
+You can use the `look_at()` function to make the head look at a specific point in space. This point must be given in Reachy 2's coordinate system in **meters**. The coordinate system is...
 --------------------------------------------------------------------------------
 
 Results from api_docs:
 --------------------------------------------------------------------------------
 
-Document (distance: 1.081):
+Document (distance: 0.430):
 Content: Move the robot to a predefined posture.
 Arguments:
 common_posture:
@@ -54,23 +54,49 @@ The name of the posture. It can be 'default' or 'elbow_90'. Defaults to 'default
 wait:
 Determines whether the program should wait f...
 
-Document (distance: 1.086):
-Content: head
-
-Document (distance: 1.101):
+Document (distance: 0.459):
 Content: def
-turn_on
+goto_posture
 (
 self
-) ->
-bool
+,
+common_posture
 :
-Activate all motors of the robot's parts.
-Returns:
-True
-if successful,
+str
+=
+'default'
+,
+wait
+:
+bool
+=
 False
-otherwise.
+,
+wait_for_goto_end
+:
+bool
+=
+True
+,
+duration
+:
+float
+=
+2
+,
+interpolation_mode
+:
+str
+=
+'minimum_jerk'
+) ->
+GoToHomeId
+:
+...
+
+Document (distance: 0.467):
+Content: Send the goal positions to the robot.
+If goal positions have been specified for any joint of the robot, sends them to the robot.
 --------------------------------------------------------------------------------
 
 Query: What sensors does Reachy have?
@@ -79,55 +105,60 @@ Query: What sensors does Reachy have?
 Results from reachy2-tutorials:
 --------------------------------------------------------------------------------
 
-Document (distance: 0.966):
-Content: If Reachy is not close enough to the table, you can adjust yourself by calling again the *translate_by* method, or turn it off (<code>reachy.mobile_base.turn_off()</code>) and move the robot yourself ...
+Document (distance: 0.410):
+Content: Now, try the function on Reachy and check its arms!
 
-Document (distance: 0.981):
-Content: arm_swing_and_effector_tracking(reachy)
+Document (distance: 0.426):
+Content: ## 2. Set up
 
-Document (distance: 0.999):
-Content: In this tutorial, we will learn how to do tasks with Reachy using :
-- the SDK client to make it move,
-- the module pollen-vision to use object detection in its environment. 
+### 2.1. Material
 
-Here, we are going to ask...
+For this tutorial, you have to set up your environment. 
+So you need :
+- Reachy (obviously)
+- a table, no higher than the robot's elbows
+- a white plate
+- a white bowl...
+
+Document (distance: 0.452):
+Content: Let's try it ! Place the fruit on the table in front of Reachy. And we'll start from the beginning.
+Reachy is going to detect the objects, select the closest one, grasp it and drop it in its target ob...
 --------------------------------------------------------------------------------
 
 Results from reachy2-sdk:
 --------------------------------------------------------------------------------
 
-Document (distance: 0.812):
+Document (distance: 0.373):
 Content: reachy.cameras
 
-Document (distance: 0.915):
-Content: In this first tutorial, we will familiarize ourselves with Reachy. We will cover how to connect to the robot and obtain basic information.
+Document (distance: 0.402):
+Content: Reachy 2 is mounted on a mobile base!
 
-Document (distance: 0.966):
-Content: Example of setting Reachy to zero pose using Reachy SDK.
+Document (distance: 0.424):
+Content: Reachy 2 has 2 types of camera:
+
+- the **teleop** cameras, with a right and left cameras, located in Reachy 2’s head and used for the teleoperation
+- the **depth** camera, equipped with a depth sensor...
 --------------------------------------------------------------------------------
 
 Results from api_docs:
 --------------------------------------------------------------------------------
 
-Document (distance: 0.934):
+Document (distance: 0.448):
+Content: The ReachySDK class manages the connection and interaction with a Reachy robot.
+This class handles:
+Establishing and maintaining a connection with the robot via gRPC.
+Accessing and controlling various...
+
+Document (distance: 0.449):
 Content: reachy2_sdk.reachy_sdk
 ReachySDK package.
 This package provides remote access (via socket) to a Reachy robot.
 It automatically handles the synchronization with the robot.
 In particular, you can easily...
 
-Document (distance: 0.980):
-Content: reachy2_sdk
-ReachySDK package.
-This package provides remote access (via socket) to a Reachy robot.
-It automatically handles the synchronization with the robot.
-In particular, you can easily get an alw...
-
-Document (distance: 1.032):
-Content: The ReachySDK class manages the connection and interaction with a Reachy robot.
-This class handles:
-Establishing and maintaining a connection with the robot via gRPC.
-Accessing and controlling various...
+Document (distance: 0.457):
+Content: Get Reachy's mobile base.
 --------------------------------------------------------------------------------
 
 Query: How can I make Reachy pick up an object?
@@ -136,56 +167,56 @@ Query: How can I make Reachy pick up an object?
 Results from reachy2-tutorials:
 --------------------------------------------------------------------------------
 
-Document (distance: 0.585):
+Document (distance: 0.264):
 Content: Let's try it ! Place the fruit on the table in front of Reachy. And we'll start from the beginning.
 Reachy is going to detect the objects, select the closest one, grasp it and drop it in its target ob...
 
-Document (distance: 0.596):
-Content: Now with only 3 functions, we are going to : 
-1. do a new object detection
-2. select the new closest object 
-3. make Reachy do the move sequence to grasp it. 
+Document (distance: 0.315):
+Content: In this tutorial, we will learn how to do tasks with Reachy using :
+- the SDK client to make it move,
+- the module pollen-vision to use object detection in its environment. 
 
-Make the robot move now : 
+Here, we are going to ask...
 
-Document (distance: 0.719):
-Content: If Reachy is not close enough to the table, you can adjust yourself by calling again the *translate_by* method, or turn it off (<code>reachy.mobile_base.turn_off()</code>) and move the robot yourself ...
+Document (distance: 0.328):
+Content: ## 2. Set up
+
+### 2.1. Material
+
+For this tutorial, you have to set up your environment. 
+So you need :
+- Reachy (obviously)
+- a table, no higher than the robot's elbows
+- a white plate
+- a white bowl...
 --------------------------------------------------------------------------------
 
 Results from reachy2-sdk:
 --------------------------------------------------------------------------------
 
-Document (distance: 0.769):
-Content: In this first tutorial, we will familiarize ourselves with Reachy. We will cover how to connect to the robot and obtain basic information.
+Document (distance: 0.409):
+Content: # Getting started with Reachy 2
 
-Document (distance: 0.778):
-Content: reachy.l_arm.get_translation_by(-0.1, 0.2, -0.1, frame='gripper')
+Document (distance: 0.420):
+Content: reachy.r_arm.get_current_positions()
 
-Document (distance: 0.789):
-Content: In the previous tutorial, we explored the concept of *goto* and basic control. Now, let's delve deeper into what we can do with Reachy's arms and grippers.
+Document (distance: 0.421):
+Content: reachy.l_arm.get_current_positions()
 --------------------------------------------------------------------------------
 
 Results from api_docs:
 --------------------------------------------------------------------------------
 
-Document (distance: 0.893):
+Document (distance: 0.424):
+Content: Get Reachy's mobile base.
+
+Document (distance: 0.426):
 Content: The ReachySDK class manages the connection and interaction with a Reachy robot.
 This class handles:
 Establishing and maintaining a connection with the robot via gRPC.
 Accessing and controlling various...
 
-Document (distance: 0.981):
-Content: l_arm
-: Optional[
-reachy2_sdk.parts.arm.Arm
-]
-Get Reachy's left arm.
-
-Document (distance: 0.994):
-Content: reachy2_sdk
-ReachySDK package.
-This package provides remote access (via socket) to a Reachy robot.
-It automatically handles the synchronization with the robot.
-In particular, you can easily get an alw...
+Document (distance: 0.446):
+Content: Get Reachy's right arm.
 --------------------------------------------------------------------------------
 

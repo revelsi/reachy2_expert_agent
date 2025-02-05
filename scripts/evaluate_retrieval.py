@@ -119,13 +119,13 @@ def main():
     parser.add_argument("--debug", action="store_true", help="Print debug information")
     args = parser.parse_args()
     
-    # Initialize with RoBERTa model
+    # Initialize with InstructorXL model
     db = VectorStore()
-    embedding_generator = EmbeddingGenerator(model_name="all-roberta-large-v1")
+    embedding_generator = EmbeddingGenerator(model_name="hkunlp/instructor-xl")
     
     print("\n=== Retrieval Evaluation Summary ===\n")
     print(f"Using embedding model: {embedding_generator.model_name}")
-    print(f"Model description: More powerful but slower model\n")
+    print(f"Model description: InstructorXL model for improved performance\n")
     
     if args.debug:
         print("Checking collection sizes:")

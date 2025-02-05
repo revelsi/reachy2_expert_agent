@@ -16,8 +16,8 @@ class ChromaEmbeddingFunction(EmbeddingFunction):
 class EmbeddingGenerator:
     """Class to generate embeddings using sentence-transformers."""
     
-    def __init__(self, model_name: str = "all-roberta-large-v1"):
-        """Initialize the embedding generator with RoBERTa model by default."""
+    def __init__(self, model_name: str = "hkunlp/instructor-xl"):
+        """Initialize the embedding generator with InstructorXL model by default."""
         self.model_name = model_name
         self.model = SentenceTransformer(model_name)
         self.embedding_function = ChromaEmbeddingFunction(self.model)

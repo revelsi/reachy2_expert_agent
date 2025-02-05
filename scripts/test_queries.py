@@ -19,9 +19,9 @@ def print_results(results, collection_name, output_file):
     output_file.write("-" * 80 + "\n")
 
 def main():
-    # Initialize vector store and embedding generator with RoBERTa model
+    # Initialize vector store and embedding generator with InstructorXL model
     db = VectorStore()
-    embedding_generator = EmbeddingGenerator(model_name="all-roberta-large-v1")
+    embedding_generator = EmbeddingGenerator(model_name="hkunlp/instructor-xl")
     
     print(f"Using model: {embedding_generator.model_name}\n")
     

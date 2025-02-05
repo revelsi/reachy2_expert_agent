@@ -36,7 +36,7 @@ def main():
     """Update the vector database with documents from JSON files."""
     # Initialize vector store and embedding generator
     db = VectorStore(persist_directory="vectorstore")
-    embedding_generator = EmbeddingGenerator(model_name="all-roberta-large-v1")
+    embedding_generator = EmbeddingGenerator(model_name="hkunlp/instructor-xl")
     
     print("\nInitializing vector store with RoBERTa embeddings...")
     
