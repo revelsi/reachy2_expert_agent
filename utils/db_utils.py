@@ -58,22 +58,27 @@ class VectorStore:
     def save(self):
         """Save the current state to the persist directory."""
         try:
-            # Close the client connection
+            print('[DEBUG] Starting save operation...')
+            print('[DEBUG] Deleting client connection...')
             del self.client
             
-            # Remove old persist directory if it exists
+            print('[DEBUG] Checking if persist directory exists...')
             if os.path.exists(self.persist_directory):
+                print(f'[DEBUG] Persist directory exists at {self.persist_directory}, removing it...')
                 shutil.rmtree(self.persist_directory)
+                print('[DEBUG] Persist directory removed.')
+            else:
+                print('[DEBUG] No persist directory found.')
             
-            # Copy temporary directory to persist directory
+            print(f'[DEBUG] Copying temporary directory from {self.temp_dir} to {self.persist_directory}...')
             shutil.copytree(self.temp_dir, self.persist_directory)
-            print(f"Saved database to {self.persist_directory}")
+            print(f'[DEBUG] Copy complete. Database saved to {self.persist_directory}')
             
-            # Reinitialize client with temporary directory
+            print('[DEBUG] Reinitializing client with temporary directory...')
             self.client = chromadb.PersistentClient(path=self.temp_dir)
-            
+            print('[DEBUG] Save operation complete.')
         except Exception as e:
-            print(f"Warning during save: {e}")
+            print(f"[ERROR] Warning during save: {e}")
             # Reinitialize client in case of error
             self.client = chromadb.PersistentClient(path=self.temp_dir)
 
