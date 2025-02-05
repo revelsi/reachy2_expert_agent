@@ -245,46 +245,42 @@ def chunk_api_docs_classes(file_path, max_chunk_size=2000):
 
 def chunk_api_docs_functions(file_path, max_chunk_size=1500, overlap=300):
     """Chunking strategy for API docs at the function level.
-    This function identifies divs with class 'classattr' and extracts 'attr function' and 'docstring'.
+    This function identifies function definitions in pdoc-generated HTML documentation.
+    It looks for div elements with class 'attr function' and extracts the function name and docstring.
 
     Args:
-        file_path: Path to the HTML file
-        max_chunk_size: Maximum size of each chunk (default: 1500 characters)
-        overlap: Overlap size between chunks (default: 300 characters)
+        file_path: Path to the HTML file.
+        max_chunk_size: Maximum size of each chunk (default: 1500).
+        overlap: Overlap between chunks if splitting is required.
+
     Returns:
-        List of text chunks, each representing an individual function's documentation.
+        List of text chunks, each containing the extracted function name and docstring.
     """
     with open(file_path, 'r', encoding='utf-8') as f:
         html = f.read()
     soup = BeautifulSoup(html, 'html.parser')
 
-    # Remove code blocks
-    for code_div in soup.find_all('div', class_='pdoc-code codehilite'):
-        code_div.decompose()
-
-    main_tag = soup.find('main')
-    if not main_tag:
-        main_tag = soup.body
-    
+    # Find all function definitions (they have class 'attr function')
+    function_divs = soup.find_all('div', class_='attr function')
     chunks = []
     
-    # Find all function sections
-    for div in main_tag.find_all('div', class_='classattr'):
-        # Get the function name/signature
-        name_elem = div.find('div', class_='attr function')
-        if name_elem:
-            signature = name_elem.get_text().strip()
-            # Get the documentation
-            doc_elem = div.find('div', class_='docstring')
-            if doc_elem:
-                doc_text = doc_elem.get_text(separator='\n').strip()
-                if doc_text:
-                    # Format the chunk
-                    formatted_text = f"### Function: {signature}\n\n{doc_text}"
-                    if len(formatted_text) > max_chunk_size:
-                        chunks.extend(split_text(formatted_text, max_chunk=max_chunk_size, overlap=overlap))
-                    else:
-                        chunks.append(formatted_text)
+    for div in function_divs:
+        # Get the function name from the div's text content
+        function_name = div.get_text().strip()
+        
+        # Find the associated docstring div (it's the next div with class 'docstring')
+        docstring_div = div.find_next('div', class_='docstring')
+        docstring = docstring_div.get_text().strip() if docstring_div else ""
+        
+        # Combine the extracted information
+        function_chunk = f"Function: {function_name}\nDocstring:\n{docstring}"
+        
+        # Split the chunk if it's too large
+        if len(function_chunk) > max_chunk_size:
+            splitted = split_text(function_chunk, max_chunk=max_chunk_size, overlap=overlap)
+            chunks.extend(splitted)
+        else:
+            chunks.append(function_chunk)
     
     return chunks
 

@@ -19,7 +19,7 @@ This system creates and maintains a semantic search index over Reachy2's documen
    - Processes raw documents using source-specific strategies:
      * Tutorial notebooks: Preserves narrative flow from markdown cells
      * SDK files: Specialized handling for code and documentation
-     * API docs: Structured extraction of documentation sections
+     * API docs: Structured extraction of documentation sections. Now processes API docs at both class- and function-level. The class-level extraction retains entire classes with their summaries and methods, while the function-level extraction extracts individual functions with signatures and docstrings.
    - Outputs JSON files with LangChain Document objects in `external_docs/documents/`
 
 3. **Vector Database**
@@ -108,6 +108,7 @@ When modifying the codebase:
 1. Each source type (tutorials, SDK, API docs) has its own chunking strategy
 2. Changes to chunking strategies should be made in `chunk_documents.py`
 3. Run evaluation scripts to ensure retrieval quality
+4. For API docs, note that the updated chunking now supports both class-level and function-level extraction.
 
 ## License
 
