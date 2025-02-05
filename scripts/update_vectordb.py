@@ -47,7 +47,8 @@ def main():
     for filepath in [
         "external_docs/documents/reachy2_tutorials.json",
         "external_docs/documents/reachy2_sdk.json",
-        "external_docs/documents/api_docs.json"
+        "external_docs/documents/api_docs_classes.json",
+        "external_docs/documents/api_docs_functions.json"
     ]:
         process_json_file(filepath, db, embedding_generator)
     

@@ -2,11 +2,21 @@ import chromadb
 from chromadb.config import Settings
 import os
 import tempfile
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Callable
 import numpy as np
 import shutil
 
 class VectorStore:
+    """Vector store wrapper for document storage and retrieval."""
+    
+    # Collection-specific search instructions for better embeddings
+    COLLECTION_INSTRUCTIONS = {
+        "api_docs_functions": "Represent this function documentation for retrieving relevant Python API methods and functions",
+        "api_docs_classes": "Represent this class documentation for retrieving relevant Python classes and their capabilities",
+        "reachy2_tutorials": "Represent this tutorial content for retrieving relevant robot programming examples and explanations",
+        "reachy2_sdk": "Represent this SDK documentation for retrieving relevant robot control and programming information"
+    }
+
     def __init__(self, persist_directory: str = "vectorstore"):
         """Initialize the vector store with persistence."""
         self.persist_directory = persist_directory
@@ -129,44 +139,40 @@ class VectorStore:
             )
 
     def add_documents(self, collection_name: str, texts: List[str], metadatas: List[Dict], ids: List[str], embedding_function):
-        """Add documents to a collection, recreating it if dimensions don't match."""
-        # Get or create collection with dimension checking
-        collection = self.get_collection_with_dimension_check(
+        """Add documents to a collection with collection-specific embedding instructions."""
+        # Get or create collection
+        collection = self.client.get_or_create_collection(
             name=collection_name,
-            embedding_function=embedding_function
+            embedding_function=embedding_function,
+            metadata={"hnsw:space": "cosine"}
         )
         
-        # Add documents
+        # Add collection-specific instruction to each text
+        instruction = self.COLLECTION_INSTRUCTIONS.get(collection_name, "")
+        if instruction:
+            texts = [f"{instruction}:\n{text}" for text in texts]
+        
+        # Add documents to collection
         collection.add(
             documents=texts,
             metadatas=metadatas,
             ids=ids
         )
     
-    def query_collection(self,
-                        collection_name: str,
-                        query_texts: List[str],
-                        n_results: int = 5,
-                        where: Optional[Dict] = None,
-                        embedding_function=None) -> List[Dict]:
-        """Query the collection with the given texts and optional filters."""
-        collection = self.client.get_collection(collection_name)
+    def query_collection(self, collection_name: str, query_texts: List[str], 
+                        n_results: int = 5, embedding_function: Callable = None) -> Dict:
+        """Query a collection with collection-specific embedding instructions."""
+        collection = self.client.get_collection(
+            name=collection_name,
+            embedding_function=embedding_function
+        )
         
-        # If embedding function is provided, use it for this query
-        if embedding_function:
-            collection._embedding_function = embedding_function
+        # Add collection-specific instruction to query
+        instruction = self.COLLECTION_INSTRUCTIONS.get(collection_name, "")
+        if instruction:
+            query_texts = [f"{instruction}:\n{text}" for text in query_texts]
         
-        # If where filter is provided, use it
-        if where:
-            results = collection.query(
-                query_texts=query_texts,
-                n_results=n_results,
-                where=where
-            )
-        else:
-            results = collection.query(
-                query_texts=query_texts,
-                n_results=n_results
-            )
-        
-        return results 
+        return collection.query(
+            query_texts=query_texts,
+            n_results=n_results
+        ) 

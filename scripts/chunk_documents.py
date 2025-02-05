@@ -244,9 +244,8 @@ def chunk_api_docs_classes(file_path, max_chunk_size=2000):
 
 
 def chunk_api_docs_functions(file_path, max_chunk_size=1500, overlap=300):
-    """Chunking strategy for API docs at the function level.
-    This function identifies function definitions in pdoc-generated HTML documentation.
-    It looks for div elements with class 'attr function' and extracts the function name and docstring.
+    """Enhanced chunking strategy for API docs at the function level.
+    Extracts function definitions with better context and structure.
 
     Args:
         file_path: Path to the HTML file.
@@ -254,28 +253,47 @@ def chunk_api_docs_functions(file_path, max_chunk_size=1500, overlap=300):
         overlap: Overlap between chunks if splitting is required.
 
     Returns:
-        List of text chunks, each containing the extracted function name and docstring.
+        List of text chunks, each containing structured function documentation.
     """
     with open(file_path, 'r', encoding='utf-8') as f:
         html = f.read()
     soup = BeautifulSoup(html, 'html.parser')
-
-    # Find all function definitions (they have class 'attr function')
+    
+    # Find all function definitions
     function_divs = soup.find_all('div', class_='attr function')
     chunks = []
     
     for div in function_divs:
-        # Get the function name from the div's text content
-        function_name = div.get_text().strip()
+        # Get the function signature including decorators
+        function_sig = div.find('dt').get_text().strip() if div.find('dt') else div.get_text().strip()
         
-        # Find the associated docstring div (it's the next div with class 'docstring')
+        # Find the associated docstring
         docstring_div = div.find_next('div', class_='docstring')
         docstring = docstring_div.get_text().strip() if docstring_div else ""
         
-        # Combine the extracted information
-        function_chunk = f"Function: {function_name}\nDocstring:\n{docstring}"
+        # Get the module/class context
+        context = []
+        parent = div.find_parent('section', class_='pdoc-module') or div.find_parent('section', class_='pdoc-class')
+        if parent:
+            context.append(f"Module/Class: {parent.find('h1').get_text().strip()}")
+            
+        # Get any decorator information
+        decorators = div.find_all('span', class_='decorator')
+        if decorators:
+            context.extend(f"Decorator: {dec.get_text().strip()}" for dec in decorators)
         
-        # Split the chunk if it's too large
+        # Extract return type if available
+        return_type = div.find('span', class_='return-annotation')
+        if return_type:
+            context.append(f"Returns: {return_type.get_text().strip()}")
+        
+        # Combine with better structure
+        function_chunk = f"""Function: {function_sig}
+Context: {' | '.join(context)}
+View Source
+Docstring:
+{docstring}"""
+        
         if len(function_chunk) > max_chunk_size:
             splitted = split_text(function_chunk, max_chunk=max_chunk_size, overlap=overlap)
             chunks.extend(splitted)
