@@ -19,13 +19,21 @@ This system creates and maintains a semantic search index over Reachy2's documen
    - Processes raw documents using source-specific strategies:
      * Tutorial notebooks: Preserves narrative flow from markdown cells
      * SDK files: Specialized handling for code and documentation
-     * API docs: Structured extraction of documentation sections. Now processes API docs at both class- and function-level. The class-level extraction retains entire classes with their summaries and methods, while the function-level extraction extracts individual functions with signatures and docstrings.
+     * API docs: Structured extraction at both class- and function-level
+     * Enhanced context preservation for better retrieval
    - Outputs JSON files with LangChain Document objects in `external_docs/documents/`
 
 3. **Vector Database**
    - Uses ChromaDB for storing document embeddings
    - Implements InstructorXL model for high-quality embeddings
+   - Collection-specific embedding instructions for improved relevance
    - Supports semantic search across all document collections
+
+4. **Evaluation System**
+   - Comprehensive evaluation metrics (Precision@5, Recall@5, MRR, nDCG@5)
+   - Test suite with diverse queries covering different robot functionalities
+   - Detailed metrics output in both console and file formats
+   - Support for semantic matching and relevance grading
 
 ## Installation
 
@@ -83,6 +91,11 @@ python scripts/evaluate_retrieval.py --debug
 python scripts/test_queries.py
 ```
 
+3. Generate detailed metrics report:
+```bash
+python scripts/evaluate_retrieval.py --output test_metrics.txt
+```
+
 ## Directory Structure
 
 ```
@@ -102,13 +115,21 @@ python scripts/test_queries.py
 └── requirements.txt
 ```
 
+## Future Improvements
+
+Planned enhancements include:
+- Implementation of two-stage retrieval with re-ranking
+- Fine-tuning of embedding models on domain-specific data
+- Query expansion and improved semantic matching
+- Enhanced evaluation metrics and benchmarking
+
 ## Contributing
 
 When modifying the codebase:
 1. Each source type (tutorials, SDK, API docs) has its own chunking strategy
 2. Changes to chunking strategies should be made in `chunk_documents.py`
 3. Run evaluation scripts to ensure retrieval quality
-4. For API docs, note that the updated chunking now supports both class-level and function-level extraction.
+4. Update test queries and metrics as needed
 
 ## License
 

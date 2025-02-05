@@ -1,92 +1,106 @@
-Pipeline Schematic of the Retrieval Pipeline
-============================================
+Reachy2 Expert Agent Pipeline Schematic
+================================
 
-1. MAKE REFRESH
-----------------
-- Command: make refresh
-- This target in the Makefile orchestrates the complete pipeline:
-  • First cleans directories (clean)
-  • Then scrapes raw documents (scrape)
-  • Processes raw documents into chunks (chunk)
-  • Finally updates the vector store (update_vectordb)
+1. Document Collection
+   |
+   |---> Tutorials (Jupyter Notebooks)
+   |     |---> Markdown + Code pairs
+   |     |---> Narrative flow preservation
+   |     |---> Context-aware chunking
+   |
+   |---> SDK Examples (Python + Notebooks)
+   |     |---> Code extraction
+   |     |---> Documentation parsing
+   |     |---> Smart segmentation
+   |
+   |---> API Documentation (HTML)
+         |---> Class-level extraction
+         |---> Function-level extraction
+         |---> Context preservation
 
-2. CLEANING – Directories
------------------------------
-- The 'clean' target in the Makefile:
-  • Removes all files from external_docs/*
-  • Removes all files from raw_docs/*
-  • Recreates necessary subdirectories (external_docs/documents and raw_docs)
+2. Document Processing
+   |
+   |---> Custom Chunking Strategies
+   |     |---> Tutorial-specific chunking
+   |     |---> SDK-specific chunking
+   |     |---> API doc-specific chunking
+   |
+   |---> Context Enhancement
+   |     |---> Metadata enrichment
+   |     |---> Cross-reference preservation
+   |     |---> Semantic markers
+   |
+   |---> Document Storage
+         |---> JSON serialization
+         |---> Metadata attachment
+         |---> Quality validation
 
-3. DATA SCRAPING (Stage 1)
---------------------------
-- Three independent scraping scripts store raw files in raw_docs/:
-  • scrape_notebooks.py: Clones/pulls reachy2-tutorials repository
-    - Stores raw .ipynb files in raw_docs/reachy2_tutorials/
-  • scrape_reachy2sdk.py: Clones/pulls reachy2-sdk repository
-    - Stores raw .py and .ipynb files in raw_docs/reachy2_sdk/
-  • scrape_api_docs.py: Fetches ReachySDK API documentation
-    - Stores raw HTML files in raw_docs/api_docs/
+3. Vector Database
+   |
+   |---> Collection Organization
+   |     |---> Tutorials collection
+   |     |---> SDK collection
+   |     |---> API classes collection
+   |     |---> API functions collection
+   |
+   |---> Embedding Generation
+   |     |---> InstructorXL model
+   |     |---> Collection-specific instructions
+   |     |---> Context-aware embedding
+   |
+   |---> Index Management
+         |---> ChromaDB storage
+         |---> Efficient retrieval
+         |---> Update handling
 
-4. DOCUMENT CHUNKING (Stage 2)
-------------------------------
-- Script: chunk_documents.py processes raw files into meaningful chunks
-- Source-specific chunking strategies:
-  • For tutorials (.ipynb):
-    - Focus on markdown cells
-    - Preserve narrative flow
-    - Split with overlap if needed
-  • For SDK files:
-    - .py files: Split on logical boundaries (functions/classes)
-    - .ipynb: Handle code and markdown cells separately
-  • For API docs (HTML):
-    - Extract main content
-    - Split by sections with headers
-- Outputs JSON files with LangChain Documents in external_docs/documents/
+4. Retrieval System
+   |
+   |---> Query Processing
+   |     |---> Query understanding
+   |     |---> Collection routing
+   |     |---> Semantic enhancement
+   |
+   |---> Search Execution
+   |     |---> Vector similarity search
+   |     |---> Multi-collection search
+   |     |---> Result aggregation
+   |
+   |---> Result Processing
+         |---> Relevance scoring
+         |---> Context assembly
+         |---> Response formatting
 
-5. UPDATE VECTOR DATABASE
----------------------------
-- Script: update_vectordb.py
-  • Initializes VectorStore with temporary directory
-  • Calls cleanup() to remove any previous collections
-  • Instantiates EmbeddingGenerator with InstructorXL model
-  • Loads JSON documents and adds to corresponding collections
-  • Saves the updated database to persistent storage
+5. Evaluation System
+   |
+   |---> Metrics Calculation
+   |     |---> Precision@5
+   |     |---> Recall@5
+   |     |---> MRR
+   |     |---> nDCG@5
+   |
+   |---> Test Suite
+   |     |---> Diverse test queries
+   |     |---> Ground truth mapping
+   |     |---> Performance tracking
+   |
+   |---> Results Analysis
+         |---> Metrics aggregation
+         |---> Performance visualization
+         |---> Improvement suggestions
 
-6. VECTOR STORE (CHROMADB)
----------------------------
-- Manages collections of documents with their embeddings
-- Uses temporary directories for safe updates
-- Performs dimension checks when switching models
-- Saves to persistent storage after updates
+Future Enhancements (Planned)
+----------------------------
+1. Two-Stage Retrieval
+   - Initial candidate selection
+   - Re-ranking with cross-encoder
+   - Score aggregation
 
-7. EMBEDDING GENERATION
------------------------
-- Uses InstructorXL model ("hkunlp/instructor-xl")
-- Generates embeddings for both indexing and querying
-- Wrapped in ChromaEmbeddingFunction for ChromaDB compatibility
+2. Query Enhancement
+   - Query expansion
+   - Semantic enrichment
+   - Context injection
 
-8. EVALUATION & QUERY EXECUTION
---------------------------------
-Two main evaluation scripts:
-• evaluate_retrieval.py:
-  - Runs test queries with known relevant documents
-  - Computes metrics (Precision, Recall, MRR, nDCG)
-  - Prints detailed evaluation summary
-• test_queries.py:
-  - Executes additional test queries
-  - Writes results to test_queries_output.txt
-  - Helps verify retrieval quality
-
-Summary
-=======
-The pipeline now clearly separates:
-1. Data acquisition (scraping raw files)
-2. Document processing (source-specific chunking)
-3. Vector store management (with InstructorXL embeddings)
-4. Evaluation and testing
-
-This separation allows for:
-- Better debugging and maintenance
-- Source-specific document handling
-- Independent optimization of each stage
-- Clearer evaluation of changes 
+3. Model Fine-tuning
+   - Domain adaptation
+   - Performance optimization
+   - Relevance learning 

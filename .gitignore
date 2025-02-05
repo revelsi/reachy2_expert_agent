@@ -39,6 +39,8 @@ libtorch_cpu.dylib
 # IDEs and Editors
 .idea/
 .vscode/
+*.swp
+*.swo
 
 # macOS generated files
 .DS_Store
@@ -49,16 +51,28 @@ raw_docs/
 external_docs/
 vectorstore/
 
-# Log files
+# Log files and evaluation outputs
 *.log
 test_queries_output.txt
 progress_log.txt
 baseline_metrics.txt
 new_metrics.txt
+test_metrics.txt
+evaluation_results/
+*_metrics.txt
+*_evaluation.txt
 
-# Ignore temporary files and directories
+# Temporary files and directories
 tmp/
 temp/
+.temp/
+__temp__/
 
-# macOS specific files
-.DS_Store 
+# Environment and configuration
+.env
+.env.local
+config.local.yaml
+
+# Debug files
+debug/
+debug.log 

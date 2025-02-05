@@ -1,32 +1,100 @@
-# Reachy 2 Project Roadmap
+# Reachy2 Expert Agent Roadmap
 
-## Overview
-This project aims to build an app that generates code for the humanoid robot Reachy 2 using natural language instructions. The app is divided into three main modules:
+## Phase 1: Core Infrastructure (Completed)
+- [x] Basic document scraping pipeline
+- [x] Initial chunking strategies
+- [x] Vector store integration
+- [x] Basic search functionality
 
-- **RAG Pipeline:** Retrieves relevant information (API documentation, code examples, etc.) using a retrieval augmented generation (RAG) approach with LangChain and ChromaDB.
-- **LLM-based Chatbot:** Processes natural language instructions and generates reliable code using an open-source language model for code generation.
-- **User Interface:** Provides a simple and efficient interface (using Gradio) to interact with the system.
+## Phase 2: Enhanced Retrieval (Current)
+- [x] Improved chunking strategies
+- [x] Collection-specific embedding
+- [x] Comprehensive evaluation system
+- [ ] Two-stage retrieval with re-ranking
+- [ ] Query expansion
+- [ ] Fine-tuned embeddings
 
+## Phase 3: Advanced Features (Next)
+### Short-term Goals (1-2 weeks)
+- [ ] Implement re-ranking system
+- [ ] Enhance evaluation metrics
+- [ ] Add cross-validation
+- [ ] Improve semantic matching
+- [ ] Create visualization tools
 
-## Project Phases
+### Mid-term Goals (2-4 weeks)
+- [ ] Fine-tune embedding models
+- [ ] Implement active learning
+- [ ] Create web interface
+- [ ] Add API documentation
+- [ ] Expand test coverage
 
-### Phase 1: Core Development
-- Prepare relevant documentation and code examples for ingestion.
-- Develop the RAG pipeline (`rag_pipeline.py`) using LangChain, text splitting, and ChromaDB for vector storage.
-- Build the LLM-based chatbot (`chatbot.py`) that wraps an open-source code generation model with a retrieval-based approach.
+### Long-term Goals (1-2 months)
+- [ ] Multi-modal query support
+- [ ] Real-time update pipeline
+- [ ] User feedback integration
+- [ ] Performance optimization
+- [ ] Scalability improvements
 
-### Phase 2: UI Integration
-- Develop a Gradio-based UI (`ui.py`) to allow user input and display generated code.
-- Integrate the RAG pipeline and chatbot with the UI for real-time interaction.
+## Phase 4: Production Ready
+- [ ] Comprehensive testing
+- [ ] Performance benchmarking
+- [ ] Documentation
+- [ ] Deployment guide
+- [ ] Monitoring tools
 
-### Phase 3: Extended Knowledge Base
-- Expand the knowledge base to include FAQs, Q&A, extended API documentation, and robot descriptions.
-- Enhance the retrieval capability to support more diverse queries and detailed robot information.
+## Technical Considerations
 
-## Additional Considerations
-- **Model Selection & Fine-Tuning:** Consider experimenting with or fine-tuning different open-source models to optimize code generation reliability.
-- **Testing & Evaluation:** Implement thorough testing with various natural language inputs to ensure the system retrieves relevant context and generates accurate code.
-- **Error Handling & Security:** Incorporate robust error handling measures and possibly implement a sandbox environment for safe code execution.
+### Retrieval System
+1. Current Implementation
+   - Vector similarity search
+   - Collection-specific embeddings
+   - Semantic matching
 
-## Summary
-This roadmap provides a clear path from developing the core capabilities (RAG pipeline, chatbot, UI) to eventually extending the system with a more comprehensive knowledge base to support a wide range of user queries and instructions. 
+2. Planned Improvements
+   - Two-stage retrieval
+   - Query expansion
+   - Re-ranking
+   - Fine-tuned models
+
+### Evaluation System
+1. Current Metrics
+   - Precision@5
+   - Recall@5
+   - MRR
+   - nDCG@5
+
+2. Future Metrics
+   - Cross-validation scores
+   - Performance benchmarks
+   - User feedback metrics
+   - System latency
+
+### Infrastructure
+1. Current Stack
+   - ChromaDB
+   - InstructorXL
+   - LangChain
+   - Beautiful Soup
+
+2. Future Additions
+   - Re-ranking models
+   - Web interface
+   - Monitoring system
+   - Deployment tools
+
+## Success Criteria
+1. Retrieval Performance
+   - High precision and recall
+   - Improved nDCG scores
+   - Fast response times
+
+2. User Experience
+   - Intuitive interface
+   - Relevant results
+   - Helpful documentation
+
+3. System Reliability
+   - Robust error handling
+   - Consistent performance
+   - Easy maintenance 
