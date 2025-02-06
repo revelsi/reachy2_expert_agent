@@ -5,6 +5,19 @@ import tempfile
 from typing import List, Dict, Optional, Callable
 import numpy as np
 import shutil
+import sys
+from contextlib import contextmanager
+import io
+
+@contextmanager
+def suppress_stdout():
+    """Context manager to temporarily suppress stdout."""
+    stdout = sys.stdout
+    sys.stdout = io.StringIO()
+    try:
+        yield
+    finally:
+        sys.stdout = stdout
 
 class VectorStore:
     """Vector store wrapper for document storage and retrieval."""
@@ -25,8 +38,17 @@ class VectorStore:
         self.temp_dir = tempfile.mkdtemp()
         print(f"Using temporary directory: {self.temp_dir}")
         
-        # Initialize client with temporary directory
-        self.client = chromadb.PersistentClient(path=self.temp_dir)
+        # Initialize client with temporary directory and settings to reduce output
+        settings = chromadb.Settings(
+            anonymized_telemetry=False,
+            allow_reset=True,
+            is_persistent=True
+        )
+        
+        self.client = chromadb.PersistentClient(
+            path=self.temp_dir,
+            settings=settings
+        )
         
         # If the persist directory exists, try to copy its contents
         if os.path.exists(persist_directory):
@@ -172,7 +194,12 @@ class VectorStore:
         if instruction:
             query_texts = [f"{instruction}:\n{text}" for text in query_texts]
         
-        return collection.query(
-            query_texts=query_texts,
-            n_results=n_results
-        ) 
+        # Suppress ChromaDB output during query
+        with suppress_stdout():
+            results = collection.query(
+                query_texts=query_texts,
+                n_results=n_results,
+                include=['documents', 'distances']
+            )
+        
+        return results 
