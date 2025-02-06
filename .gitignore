@@ -1,12 +1,8 @@
-# Byte-compiled / optimized / DLL files
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
-
-# C extensions
 *.so
-
-# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -28,61 +24,74 @@ ENV/
 env/
 env.bak/
 venv.bak/
+.env
 
-# Your unwanted environment folders (adjust names if needed)
-newenv/
-new_env/
-
-# Unwanted large binary files
-libtorch_cpu.dylib
-
-# IDEs and Editors
+# IDE and Editor files
 .idea/
 .vscode/
 *.swp
 *.swo
-
-# macOS generated files
+*.swn
 .DS_Store
 Thumbs.db
 
-# Project specific directories
+# Project specific
 raw_docs/
 external_docs/
 vectorstore/
-
-# Log files and evaluation outputs
-*.log
-test_queries_output.txt
-progress_log.txt
-baseline_metrics.txt
-new_metrics.txt
-test_metrics.txt
-evaluation_results/
-*_metrics.txt
-*_evaluation.txt
-
-# Temporary files and directories
-tmp/
 temp/
+tmp/
 .temp/
 __temp__/
-.pytest_cache/
-pytest_cache/
 
-# Environment and configuration
-.env
-.env.local
-config.local.yaml
-
-# Debug files
-debug/
-debug.log
-
-# Test outputs and metrics
-test_metrics.txt
+# Logs and outputs
+*.log
+logs/
+test_output/
+evaluation_results/
 *_metrics.txt
 *_evaluation.txt
-evaluation_results/
-test_output/
-chunk_test_output/ 
+test_metrics.txt
+baseline_metrics.txt
+new_metrics.txt
+chunk_test_output/
+
+# Model files and caches
+.cache/
+.pytest_cache/
+models/
+*.pt
+*.pth
+*.ckpt
+*.bin
+
+# Configuration
+.env
+.env.local
+.env.*.local
+config.local.yaml
+
+# Debug
+debug/
+debug.log
+debug_output/
+
+# Documentation drafts
+docs/_build/
+docs/_static/
+docs/_templates/
+*.draft.md
+
+# Temporary files
+.~*
+~$*
+*.bak
+*.tmp
+*.temp
+
+# Unwanted large binary files
+libtorch_cpu.dylib
+
+# Your unwanted environment folders (adjust names if needed)
+newenv/
+new_env/ 

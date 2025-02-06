@@ -1,41 +1,37 @@
 # Reachy2 Expert Agent
 
-A retrieval-based expert system for Reachy2 robot documentation and code examples.
+A retrieval-based expert system for Reachy2 robot documentation and code examples, featuring an interactive chatbot interface.
 
 ## Overview
 
-This system creates and maintains a semantic search index over Reachy2's documentation, tutorials, and SDK examples. It uses a two-stage pipeline for document processing and the InstructorXL model for generating embeddings.
+This system creates and maintains a semantic search index over Reachy2's documentation, tutorials, and SDK examples. It uses a sophisticated RAG (Retrieval-Augmented Generation) pipeline with query decomposition and the InstructorXL model for generating embeddings.
+
+## Features
+
+- Interactive chatbot interface with real-time feedback
+- Query decomposition for complex robot control questions
+- Multi-collection semantic search with collection-specific instructions
+- Enhanced document chunking strategies for different content types
+- Comprehensive evaluation metrics and testing suite
 
 ## Pipeline Structure
 
-1. **Scraping Stage**
-   - Fetches raw documents from multiple sources:
-     * Reachy2 Tutorials (Jupyter notebooks)
-     * Reachy2 SDK examples (Python files and notebooks)
-     * API documentation (HTML)
-   - Raw files are stored in `raw_docs/` directory
+1. **Query Processing**
+   - Query decomposition into actionable sub-tasks
+   - Collection-specific instruction enhancement
+   - Real-time progress feedback
 
-2. **Chunking Stage**
-   - Processes raw documents using source-specific strategies:
-     * Tutorial notebooks: Preserves narrative flow from markdown cells
-     * SDK files: Specialized handling for code and documentation
-     * API docs: Structured extraction at both class- and function-level
-     * Enhanced context preservation for better retrieval
-     * Improved text cleaning with whitespace normalization
-   - Outputs JSON files with LangChain Document objects in `external_docs/documents/`
+2. **Document Retrieval**
+   - Multi-collection semantic search
+   - Collection-specific weighting
+   - Enhanced context preservation
+   - Efficient ChromaDB integration
 
-3. **Vector Database**
-   - Uses ChromaDB for storing document embeddings
-   - Implements InstructorXL model for high-quality embeddings
-   - Collection-specific embedding instructions for improved relevance
-   - Supports semantic search across all document collections
-
-4. **Evaluation System**
-   - Comprehensive evaluation metrics (Precision@5, Recall@5, MRR, nDCG@5)
-   - Test suite with diverse queries covering different robot functionalities
-   - Detailed metrics output in both console and file formats
-   - Support for semantic matching and relevance grading
-   - Enhanced metrics tracking and analysis
+3. **Response Generation**
+   - Context-aware response synthesis
+   - Code snippet generation
+   - Error handling and timeout protection
+   - Progress indication
 
 ## Installation
 
@@ -50,102 +46,108 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+3. Set up environment variables:
+   - Copy `.env.example` to `.env`
+   - Add your OpenAI API key
+   - Configure debug settings if needed
+
 ## Usage
 
-### Complete Pipeline Refresh
-To run the complete pipeline (clean → scrape → chunk → update vector store):
+### Running the Chatbot
 ```bash
-make refresh
+python scripts/chatbot.py
 ```
 
-### Individual Steps
-You can also run individual stages:
+The chatbot interface provides:
+- Real-time query processing feedback
+- Example queries by category
+- Code snippet copying
+- Chat history management
 
-1. Clean all directories:
+### Pipeline Testing
 ```bash
-make clean
+# Test the complete RAG pipeline
+python scripts/test_rag_pipeline.py
+
+# Test query decomposition
+python scripts/test_query_decomposition.py
+
+# Evaluate retrieval performance
+python scripts/evaluate_retrieval.py
 ```
 
-2. Scrape raw documents:
+### Document Processing
 ```bash
-make scrape
-```
+# Process new documents
+python scripts/chunk_documents.py
 
-3. Process documents into chunks:
-```bash
-make chunk
-```
-
-4. Update vector store:
-```bash
-make update_vectordb
-```
-
-### Testing and Evaluation
-
-1. Run evaluation metrics:
-```bash
-python scripts/evaluate_retrieval.py --debug
-```
-
-2. Test specific queries:
-```bash
-python scripts/test_queries.py
-```
-
-3. Generate detailed metrics report:
-```bash
-python scripts/evaluate_retrieval.py --output test_metrics.txt
-```
-
-4. Test chunking functionality:
-```bash
-python scripts/test_chunking.py
+# Update vector database
+python scripts/update_vectordb.py
 ```
 
 ## Directory Structure
 
 ```
 .
-├── raw_docs/                  # Raw documents from scraping
-│   ├── api_docs/             # Raw HTML files
-│   ├── reachy2_tutorials/    # Raw notebook files
-│   └── reachy2_sdk/          # Raw Python and notebook files
-├── external_docs/
-│   └── documents/           # Processed JSON documents
 ├── scripts/
-│   ├── scrape_*.py          # Scraping scripts
-│   ├── chunk_documents.py   # Document processing
-│   └── evaluate_*.py        # Evaluation scripts
-├── utils/                    # Utility modules
-├── vectorstore/             # ChromaDB storage
+│   ├── chatbot.py              # Interactive chatbot interface
+│   ├── chunk_documents.py      # Document processing
+│   ├── test_rag_pipeline.py    # Pipeline testing
+│   ├── update_vectordb.py      # Vector store management
+│   └── evaluate_retrieval.py   # Performance evaluation
+├── utils/
+│   ├── rag_utils.py           # Core RAG pipeline components
+│   ├── db_utils.py            # Vector store utilities
+│   ├── embedding_utils.py      # Embedding generation
+│   └── config.py              # Configuration management
+├── external_docs/             # Processed documents
+├── vectorstore/              # ChromaDB storage
 └── requirements.txt
 ```
 
-## Future Improvements
+## Configuration
 
-Planned enhancements include:
-- Implementation of two-stage retrieval with re-ranking
-- Fine-tuning of embedding models on domain-specific data
-- Query expansion and improved semantic matching
-- Enhanced evaluation metrics and benchmarking
+The system uses a hierarchical configuration system:
+- Environment variables (via `.env`)
+- Model configurations (in `utils/config.py`)
+- RAG pipeline settings
+- Collection-specific weights and instructions
 
 ## Contributing
 
-When modifying the codebase:
-1. Each source type (tutorials, SDK, API docs) has its own chunking strategy
-2. Changes to chunking strategies should be made in `chunk_documents.py`
-3. Run evaluation scripts to ensure retrieval quality
-4. Update test queries and metrics as needed
+1. Fork the repository
+2. Create a feature branch
+3. Run the test suite before submitting changes:
+```bash
+python scripts/test_rag_pipeline.py
+python scripts/evaluate_retrieval.py
+```
+4. Submit a pull request
 
 ## License
 
-[Add your license information here]
+This project is licensed under the Apache License, Version 2.0 - see the [LICENSE](LICENSE) file for details.
+
+```
+Copyright 2024 Pollen Robotics
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
 
 ## Contact
 
 For more information, please contact the project maintainers.
 
-## Project Overview
+## Project Status
 
-For a consolidated view of the project objectives, current progress, and next steps, please refer to [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md).
+For detailed information about current progress and planned improvements, see [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md).

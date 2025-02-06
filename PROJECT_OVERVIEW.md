@@ -2,67 +2,118 @@
 
 ## Overall Project Objectives
 
-- Build a robust Retrieval-Augmented Generation (RAG) system for Reachy2 robot documentation and code examples.
-- Enhance semantic retrieval by leveraging collection-specific instructions and advanced chunking techniques.
-- Develop advanced query handling, including decomposition of complex queries (e.g., 'wave hello with its right arm') into actionable sub-queries.
-- Integrate a two-stage retrieval process with re-ranking to boost relevance and precision in search results.
-- Implement a final synthesis and code generation step to produce coherent answers, potentially including executable code for robot control.
-- Optimize for cost, resource usage, and latency while maintaining high retrieval and synthesis quality.
+- Build a robust Retrieval-Augmented Generation (RAG) system for Reachy2 robot documentation and code examples
+- Provide an intuitive chatbot interface for accessing robot control information
+- Enhance semantic retrieval through collection-specific instructions and advanced chunking
+- Implement real-time feedback and progress indication for better user experience
+- Optimize for both accuracy and response time in information retrieval
 
 ## Current Progress
 
-### Completed Tasks
+### Completed Features
 
-- **Document Processing & Retrieval:**
-  - Implemented enhanced chunking strategies for API docs, tutorials, and SDK files.
-  - Added improved text cleaning with whitespace normalization.
-  - Integrated a vector store (ChromaDB) with collection-specific embedding instructions using the InstructorXL model.
-  - Developed a basic chatbot interface for testing retrieval.
+1. **Interactive Chatbot Interface**
+   - Real-time progress feedback
+   - Organized example queries by category
+   - Code snippet copying functionality
+   - Chat history management
+   - Error handling and timeout protection
 
-- **Evaluation System:**
-  - Developed evaluation metrics (Precision@5, Recall@5, MRR, nDCG@5).
-  - Created a test suite with diverse queries and detailed metrics export.
-  - Added comprehensive testing for chunking functionality.
-  - Implemented enhanced metrics tracking and analysis.
+2. **Document Processing & Retrieval**
+   - Enhanced chunking strategies for different document types
+   - Collection-specific embedding instructions
+   - ChromaDB integration with improved output handling
+   - Multi-collection semantic search
+   - Context preservation in document processing
 
-- **Infrastructure & Documentation:**
-  - Updated documentation (README, .gitignore, and others) to reflect recent changes.
-  - Established project tracking and roadmap documents.
+3. **Query Processing**
+   - Query decomposition into actionable sub-tasks
+   - Progress indication during processing
+   - Timeout protection for long-running operations
+   - Error handling and recovery
 
-### Ongoing & Upcoming Tasks
+4. **Evaluation System**
+   - Comprehensive metrics (Precision@5, Recall@5, MRR, nDCG@5)
+   - Test suite with diverse queries
+   - Performance tracking and analysis
+   - Detailed metrics export
 
-- **Advanced Query Handling:**
-  - Implement a query decomposition module to break down complex queries into sub-queries (e.g., decomposing 'wave hello with its right arm' into actionable steps like 'raise right arm', 'rotate shoulder', etc.).
-  - Evaluate lightweight LLM candidates (e.g., GPT-3.5 Turbo, LLaMA-2 7B, T5-base) for cost-effective query decomposition.
+### Ongoing Development
 
-- **Tailored Retrieval Enhancements:**
-  - Adapt the current retrieval process to handle multiple sub-queries from the decomposition step.
-  - Implement an aggregation layer and optional re-ranking using a cross-encoder (e.g., cross-encoder/ms-marco-MiniLM-L-6-v2) to improve result precision.
+1. **Performance Optimization**
+   - Reducing response latency
+   - Improving memory usage
+   - Optimizing ChromaDB operations
+   - Enhancing error handling
 
-- **Final Synthesis and Code Generation:**
-  - Develop a synthesis component that aggregates re-ranked results and generates final responses or code snippets. Consider candidates such as GPT-4, StarCoder, or Code Llama.
+2. **User Experience**
+   - Refining progress indicators
+   - Improving error messages
+   - Enhancing example organization
+   - Adding more interactive features
 
-- **Cost & Latency Analysis:**
-  - Benchmark the multi-step pipeline (query decomposition, retrieval, re-ranking, synthesis) to analyze performance, cost per query, and end-to-end latency.
-
-- **Integration and Testing:**
-  - Integrate these advanced retrieval and synthesis components into the existing RAG pipeline.
-  - Conduct thorough testing with sample queries and refine parameters based on real-world performance.
+3. **Documentation**
+   - Updating usage guides
+   - Adding more code examples
+   - Improving API documentation
+   - Creating troubleshooting guides
 
 ## Next Steps
 
-1. **Implement Query Decomposition:**
-   - Develop and test a module that uses a lightweight LLM to break down complex queries into sub-queries.
+1. **Enhanced Retrieval**
+   - Implement cross-encoder re-ranking
+   - Add query expansion capabilities
+   - Improve context aggregation
+   - Optimize collection weights
 
-2. **Enhance Retrieval Process:**
-   - Modify the vector store retrieval to handle multiple sub-queries and aggregate results.
-   - Integrate a re-ranking mechanism to improve relevance of the final aggregated results.
+2. **Code Generation**
+   - Improve code snippet accuracy
+   - Add validation for generated code
+   - Implement safety checks
+   - Enhance error handling
 
-3. **Develop Final Synthesis Module:**
-   - Build a synthesis step that takes aggregated outputs and generates a final response or executable code.
+3. **User Interface**
+   - Add visualization features
+   - Implement session management
+   - Add configuration options
+   - Improve mobile responsiveness
 
-4. **Benchmark and Optimize:**
-   - Measure cost and latency using different model candidates (e.g., GPT-3.5 Turbo vs. GPT-4) and refine the pipeline accordingly.
+4. **Testing & Evaluation**
+   - Expand test coverage
+   - Add performance benchmarks
+   - Implement automated testing
+   - Create stress tests
 
-5. **Update Documentation:**
-   - Continuously update this project overview as new tasks and progress are made. 
+5. **Documentation & Support**
+   - Create detailed API documentation
+   - Add more usage examples
+   - Create video tutorials
+   - Improve error documentation
+
+## Timeline
+
+### Short-term (1-2 weeks)
+- Complete performance optimization
+- Implement cross-encoder re-ranking
+- Improve error handling
+- Update documentation
+
+### Medium-term (2-4 weeks)
+- Add query expansion
+- Implement code validation
+- Enhance user interface
+- Expand test coverage
+
+### Long-term (1-2 months)
+- Add visualization features
+- Create comprehensive documentation
+- Implement advanced features
+- Conduct thorough testing
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on:
+- Code style and standards
+- Testing requirements
+- Documentation requirements
+- Review process 
