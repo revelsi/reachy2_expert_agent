@@ -32,12 +32,58 @@ class RAGConfig:
     TOP_K_CHUNKS: int = 5
     RERANK_TOP_K: int = 3
     
-    # Collection weights for different document types
+    # Collection weights for different query types
     COLLECTION_WEIGHTS = {
-        "reachy2_tutorials": 1.0,
-        "reachy2_sdk": 1.0,
-        "api_docs_classes": 0.8,
-        "api_docs_functions": 0.8
+        "code": {
+            "api_docs_functions": 1.0,    # Function signatures and usage (primary source)
+            "api_docs_classes": 0.9,      # Class structure and methods
+            "reachy2_sdk": 0.9,          # Implementation details
+            "reachy2_tutorials": 0.8     # Complete working examples
+        },
+        "concept": {
+            "api_docs_classes": 1.0,      # Architecture and design (primary source)
+            "reachy2_tutorials": 0.9,     # High-level explanations
+            "reachy2_sdk": 0.9,          # Implementation context
+            "api_docs_functions": 0.8     # Specific details
+        },
+        "error": {
+            "api_docs_classes": 1.0,      # Error class definitions (primary source)
+            "api_docs_functions": 0.9,    # Error-related methods
+            "reachy2_sdk": 0.9,          # Error handling examples
+            "reachy2_tutorials": 0.8      # Error scenarios
+        },
+        "setup": {
+            "api_docs_classes": 1.0,      # Component initialization (primary source)
+            "reachy2_sdk": 0.9,          # Configuration details
+            "api_docs_functions": 0.9,    # Setup methods
+            "reachy2_tutorials": 0.8      # Setup guides
+        },
+        "default": {
+            "api_docs_functions": 1.0,    # API reference is the primary source
+            "api_docs_classes": 0.9,      # Class documentation
+            "reachy2_sdk": 0.9,          # SDK implementation
+            "reachy2_tutorials": 0.8      # Usage examples
+        }
+    }
+    
+    # Query type detection keywords
+    QUERY_KEYWORDS = {
+        "code": [
+            "how to", "example", "implement", "code", "function",
+            "method", "call", "use", "write", "program"
+        ],
+        "concept": [
+            "what is", "explain", "understand", "concept", "architecture",
+            "design", "overview", "describe", "definition", "mean"
+        ],
+        "error": [
+            "error", "exception", "fail", "issue", "bug", "problem",
+            "wrong", "fix", "debug", "handle", "catch"
+        ],
+        "setup": [
+            "setup", "install", "configure", "initialization", "start",
+            "calibrate", "prepare", "connect", "setting", "configuration"
+        ]
     }
 
 class Config:

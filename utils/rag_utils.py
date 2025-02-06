@@ -140,15 +140,34 @@ class RAGPipeline:
         self.reranker = ReRanker()
         self.generator = ResponseGenerator()
     
+    def detect_query_type(self, query: str) -> str:
+        """Detect the type of query based on keywords."""
+        query = query.lower()
+        
+        # Check each query type's keywords
+        for query_type, keywords in config.rag_config.QUERY_KEYWORDS.items():
+            if any(keyword in query for keyword in keywords):
+                return query_type
+        
+        return "default"
+    
+    def get_collection_weights(self, query: str) -> dict:
+        """Get collection weights based on query type."""
+        query_type = self.detect_query_type(query)
+        return config.rag_config.COLLECTION_WEIGHTS[query_type]
+    
     def process_query(self, query: str) -> str:
         """Process a query through the complete RAG pipeline."""
         # 1. Decompose query into sub-queries
         sub_queries = self.decomposer.decompose_query(query)
         
+        # Get collection weights for this query
+        collection_weights = self.get_collection_weights(query)
+        
         # 2. Retrieve relevant documents for each sub-query
         all_results = []
         for sub_query in sub_queries:
-            for collection in config.rag_config.COLLECTION_WEIGHTS.keys():
+            for collection, weight in collection_weights.items():
                 results = self.vector_store.query_collection(
                     collection_name=collection,
                     query_texts=[sub_query],
@@ -156,15 +175,21 @@ class RAGPipeline:
                     embedding_function=self.embedding_generator.embedding_function
                 )
                 
-                # Weight the results based on collection
-                weight = config.rag_config.COLLECTION_WEIGHTS[collection]
+                # Weight the results based on collection and query type
                 weighted_scores = [
                     score * weight 
                     for score in results['distances'][0]
                 ]
                 
+                # Add source collection to metadata for analysis
+                documents = results['documents'][0]
+                documents_with_source = [
+                    f"[{collection}] {doc}" 
+                    for doc in documents
+                ]
+                
                 all_results.extend(list(zip(
-                    results['documents'][0],
+                    documents_with_source,
                     weighted_scores
                 )))
         
@@ -179,7 +204,7 @@ class RAGPipeline:
         # 4. Generate final response
         response = self.generator.generate_response(query, context)
         
-        return response 
+        return response
 
 class VectorStore:
     """Vector store wrapper for document storage and retrieval."""
