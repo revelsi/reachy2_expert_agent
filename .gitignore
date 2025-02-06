@@ -67,6 +67,8 @@ tmp/
 temp/
 .temp/
 __temp__/
+.pytest_cache/
+pytest_cache/
 
 # Environment and configuration
 .env
@@ -75,4 +77,12 @@ config.local.yaml
 
 # Debug files
 debug/
-debug.log 
+debug.log
+
+# Test outputs and metrics
+test_metrics.txt
+*_metrics.txt
+*_evaluation.txt
+evaluation_results/
+test_output/
+chunk_test_output/ 

@@ -21,6 +21,7 @@ This system creates and maintains a semantic search index over Reachy2's documen
      * SDK files: Specialized handling for code and documentation
      * API docs: Structured extraction at both class- and function-level
      * Enhanced context preservation for better retrieval
+     * Improved text cleaning with whitespace normalization
    - Outputs JSON files with LangChain Document objects in `external_docs/documents/`
 
 3. **Vector Database**
@@ -34,6 +35,7 @@ This system creates and maintains a semantic search index over Reachy2's documen
    - Test suite with diverse queries covering different robot functionalities
    - Detailed metrics output in both console and file formats
    - Support for semantic matching and relevance grading
+   - Enhanced metrics tracking and analysis
 
 ## Installation
 
@@ -96,6 +98,11 @@ python scripts/test_queries.py
 python scripts/evaluate_retrieval.py --output test_metrics.txt
 ```
 
+4. Test chunking functionality:
+```bash
+python scripts/test_chunking.py
+```
+
 ## Directory Structure
 
 ```
@@ -138,3 +145,7 @@ When modifying the codebase:
 ## Contact
 
 For more information, please contact the project maintainers.
+
+## Project Overview
+
+For a consolidated view of the project objectives, current progress, and next steps, please refer to [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md).

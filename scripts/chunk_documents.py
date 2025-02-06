@@ -16,14 +16,27 @@ except ImportError:
             json.dump([{'page_content': doc.page_content, 'metadata': doc.metadata} for doc in docs], f, indent=2)
 
 
+def clean_text(text: str) -> str:
+    """Clean the text by stripping extra whitespace, collapsing multiple newlines and spaces."""
+    text = text.strip()
+    # Collapse multiple newlines into a single newline
+    text = re.sub(r'\n\s*\n+', '\n', text)
+    # Collapse multiple spaces/tabs into a single space
+    text = re.sub(r'[ \t]+', ' ', text)
+    return text
+
+
 def split_text(text, max_chunk=1500, overlap=300):
-    """Splits text into chunks of max_chunk size with an overlap."""
+    """Splits text into chunks of max_chunk size with an overlap, cleaning whitespace in each chunk."""
+    # Clean the text before splitting
+    text = clean_text(text)
     chunks = []
     start = 0
     while start < len(text):
         end = start + max_chunk
         chunk = text[start:end]
-        chunks.append(chunk)
+        # Clean each chunk
+        chunks.append(clean_text(chunk))
         if end >= len(text):
             break
         start = end - overlap
