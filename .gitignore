@@ -55,6 +55,7 @@ test_metrics.txt
 baseline_metrics.txt
 new_metrics.txt
 chunk_test_output/
+progress_log.txt
 
 # Model files and caches
 .cache/
@@ -88,6 +89,20 @@ docs/_templates/
 *.bak
 *.tmp
 *.temp
+
+# Old directories to remove
+chatbot/
+rag_pipeline/
+ui/
+
+# System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
 # Unwanted large binary files
 libtorch_cpu.dylib
