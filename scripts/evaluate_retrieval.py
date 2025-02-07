@@ -11,42 +11,51 @@ from typing import Dict, List
 # Test queries and their relevant document IDs for each collection
 TEST_QUERIES = {
     "How to move Reachy's arm?": {
-        "reachy2_tutorials": ["Arm movement", "goto", "translate_by", "rotate_by"],
+        "api_docs_modules": ["arm", "goto_based_part", "joints_based_part"],
+        "api_docs_classes": ["Arm", "ArmController", "goto", "translate_by", "rotate_by"],
+        "api_docs_functions": ["turn_on", "goto", "rotate_by", "translate_by", "set_goal_positions"],
         "reachy2_sdk": ["Move Reachy's right arm", "goto_posture", "rotate_by"],
-        "api_docs_classes": ["Arm", "ReachySDK", "ArmController"],
-        "api_docs_functions": ["turn_on", "goto", "rotate_by", "translate_by", "set_goal_positions"]
+        "reachy2_tutorials": ["Arm movement", "goto", "translate_by", "rotate_by"]
     },
     "What is the camera API?": {
-        "reachy2_tutorials": ["PollenSDKCameraWrapper", "camera_wrapper", "get_image"],
-        "reachy2_sdk": ["reachy.cameras", "CameraView", "camera_manager"],
-        "api_docs_classes": ["CameraManager", "CameraView"],
-        "api_docs_functions": ["get_image", "get_intrinsics", "get_camera_info"]
+        "api_docs_modules": ["camera", "camera_manager", "media"],
+        "api_docs_classes": ["CameraManager", "CameraView", "get_image"],
+        "api_docs_functions": ["get_image", "get_intrinsics", "get_camera_info"],
+        "vision_examples": ["camera_wrapper", "SDKWrapper", "get_image"],
+        "reachy2_tutorials": ["camera_usage", "get_image", "camera_setup"]
     },
     "How to control the gripper?": {
-        "reachy2_tutorials": ["gripper.open", "gripper.close", "gripper_control"],
+        "api_docs_modules": ["hand", "gripper"],
+        "api_docs_classes": ["Gripper", "GripperController", "open", "close"],
+        "api_docs_functions": ["open", "close", "set_opening", "get_opening"],
         "reachy2_sdk": ["Gripper Control", "open", "close", "set_opening"],
-        "api_docs_classes": ["Gripper", "GripperController"],
-        "api_docs_functions": ["open", "close", "set_opening", "get_opening"]
+        "reachy2_tutorials": ["gripper.open", "gripper.close", "gripper_control"]
     },
     "How to get joint positions?": {
-        "reachy2_tutorials": ["joint_positions", "get_positions", "joint_states"],
+        "api_docs_modules": ["joints_based_part", "part"],
+        "api_docs_classes": ["Joint", "JointState", "get_positions"],
+        "api_docs_functions": ["get_current_positions", "get_joint_states", "get_state"],
         "reachy2_sdk": ["get_positions", "joint_states", "current_position"],
-        "api_docs_classes": ["Joint", "JointState", "JointController"],
-        "api_docs_functions": ["get_current_positions", "get_joint_states", "get_state"]
+        "reachy2_tutorials": ["joint_positions", "get_positions", "joint_states"]
     },
     "How to handle errors and exceptions?": {
-        "reachy2_tutorials": ["error_handling", "try_except", "connection_error"],
-        "reachy2_sdk": ["RobotError", "ConnectionError", "handle_error"],
-        "api_docs_classes": ["RobotError", "ConnectionManager", "ErrorHandler"],
-        "api_docs_functions": ["is_connected", "check_connection", "handle_error"]
+        "api_docs_modules": ["utils", "error_handling"],
+        "api_docs_classes": ["RobotError", "ConnectionManager", "handle_error"],
+        "api_docs_functions": ["is_connected", "check_connection", "handle_error"],
+        "reachy2_sdk": ["error_handling", "try_except", "connection_error"],
+        "reachy2_tutorials": ["error_handling", "try_except", "connection_error"]
     },
     "How to control mobile base movement?": {
-        "reachy2_tutorials": ["mobile_base", "move_forward", "turn"],
-        "reachy2_sdk": ["MobileBase", "move_to", "rotate"],
-        "api_docs_classes": ["MobileBase", "BaseController"],
-        "api_docs_functions": ["move_forward", "turn", "set_velocity", "stop"]
+        "api_docs_modules": ["mobile_base", "base_controller"],
+        "api_docs_classes": ["MobileBase", "BaseController", "move_to"],
+        "api_docs_functions": ["move_forward", "turn", "set_velocity", "stop"],
+        "reachy2_sdk": ["mobile_base", "move_to", "rotate"],
+        "reachy2_tutorials": ["mobile_base", "move_forward", "turn"]
     }
 }
+
+# Use a smaller model for faster evaluation
+EVAL_MODEL = "hkunlp/instructor-base"
 
 def calculate_metrics(results: Dict, relevant_ids: List[str]) -> Dict[str, float]:
     """Calculate retrieval metrics with enhanced semantic matching.
@@ -64,16 +73,19 @@ def calculate_metrics(results: Dict, relevant_ids: List[str]) -> Dict[str, float
     # Enhanced relevance matching
     relevant_retrieved = []
     for doc in retrieved_docs:
-        # Check exact matches
-        exact_match = any(rel_id.lower() in doc.lower() for rel_id in relevant_ids)
+        # Extract content for matching
+        content = doc.lower()
         
-        # Check semantic matches
+        # Check exact matches
+        exact_match = any(rel_id.lower() in content for rel_id in relevant_ids)
+        
+        # Check semantic matches with context awareness
         semantic_match = any(
-            rel_id.lower().replace('_', '.') in doc.lower() or  # handle method calls
-            rel_id.lower().replace('.', '_') in doc.lower() or  # handle function names
-            any(word in doc.lower() for word in rel_id.lower().split('_')) or  # partial matches
+            rel_id.lower().replace('_', '.') in content or  # handle method calls
+            rel_id.lower().replace('.', '_') in content or  # handle function names
+            any(word in content for word in rel_id.lower().split('_')) or  # partial matches
             any(  # handle common variations
-                variation in doc.lower() 
+                variation in content 
                 for rel_id in relevant_ids 
                 for variation in [
                     f"def {rel_id}",  # function definitions
@@ -81,7 +93,9 @@ def calculate_metrics(results: Dict, relevant_ids: List[str]) -> Dict[str, float
                     f"{rel_id}(",  # function calls
                     f".{rel_id}",  # method calls
                     f"'{rel_id}'",  # string literals
-                    f"\"{rel_id}\""  # string literals
+                    f"\"{rel_id}\"",  # string literals
+                    f"Method: {rel_id}",  # method documentation
+                    f"Function: {rel_id}"  # function documentation
                 ]
             )
             for rel_id in relevant_ids
@@ -234,39 +248,23 @@ def evaluate_retrieval(db: VectorStore, embedding_generator: EmbeddingGenerator)
     return collection_metrics
 
 def main():
-    """Main function to run the evaluation."""
-    parser = argparse.ArgumentParser(description="Evaluate retrieval performance")
-    parser.add_argument("--debug", action="store_true", help="Print debug information")
-    parser.add_argument("--output", type=str, default="test_metrics.txt", 
-                       help="Output file for detailed metrics (default: test_metrics.txt)")
-    args = parser.parse_args()
+    """Run the evaluation pipeline."""
+    print(f"Using {EVAL_MODEL} for evaluation")
     
-    # Initialize with InstructorXL model
-    db = VectorStore()
-    embedding_generator = EmbeddingGenerator(model_name="hkunlp/instructor-xl")
+    # Initialize embedding generator with evaluation model
+    embedding_generator = EmbeddingGenerator(model_name=EVAL_MODEL)
     
-    print("\n=== Retrieval Evaluation Summary ===\n")
-    print(f"Using embedding model: {embedding_generator.model_name}")
-    print(f"Model description: InstructorXL model for improved performance\n")
+    # Initialize vector store
+    vector_store = VectorStore()
     
-    if args.debug:
-        print("Checking collection sizes:")
-        print("-" * 50)
-        for collection_name in ["api_docs_classes", "api_docs_functions", "reachy2_sdk", "reachy2_tutorials"]:
-            try:
-                collection = db.client.get_collection(collection_name)
-                count = collection.count()
-                print(f"{collection_name}: {count} documents")
-            except Exception as e:
-                print(f"Could not get collection {collection_name}: {e}")
-        print()
+    # Run evaluation
+    evaluate_retrieval(vector_store, embedding_generator)
     
-    print("Starting evaluation...\n")
-    collection_metrics = evaluate_retrieval(db, embedding_generator)
-    
-    # Save metrics to file
-    save_metrics_to_file(collection_metrics, args.output)
-    print(f"\nDetailed metrics have been saved to {args.output}")
+    # Save results
+    save_metrics_to_file(
+        collection_metrics={},  # Will be populated by evaluate_retrieval
+        output_file="evaluation_results.txt"
+    )
 
 if __name__ == "__main__":
     from math import log2

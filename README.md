@@ -1,132 +1,148 @@
 # Reachy2 Expert Agent
 
-A retrieval-based expert system for Reachy2 robot documentation and code examples, featuring an interactive chatbot interface.
-
-## Overview
-
-This system creates and maintains a semantic search index over Reachy2's documentation, tutorials, and SDK examples. It uses a sophisticated RAG (Retrieval-Augmented Generation) pipeline with query decomposition and the InstructorXL model for generating embeddings.
+An intelligent documentation-aware assistant for the Reachy2 robot platform. This agent helps developers and users by providing accurate, context-aware responses about robot control, programming, and usage.
 
 ## Features
 
-- Interactive chatbot interface with real-time feedback
-- Query decomposition for complex robot control questions
-- Multi-collection semantic search with collection-specific instructions
-- Enhanced document chunking strategies for different content types
-- Comprehensive evaluation metrics and testing suite
+- 🤖 **Intelligent Query Processing**: Breaks down complex queries into manageable sub-tasks
+- 📚 **Multi-Source Documentation**: Integrates API docs, tutorials, and code examples
+- 🔍 **Context-Aware Responses**: Provides relevant code snippets and explanations
+- 🛠️ **Comprehensive Coverage**: Covers SDK, Vision module, and tutorials
+- 🔄 **Regular Updates**: Stays current with the latest documentation
 
-## Pipeline Structure
+## Project Structure
 
-1. **Query Processing**
-   - Query decomposition into actionable sub-tasks
-   - Collection-specific instruction enhancement
-   - Real-time progress feedback
+```
+.
+├── scripts/                 # Core processing scripts
+│   ├── scrape_*.py         # Documentation scrapers
+│   ├── chunk_documents.py  # Document processing
+│   ├── update_vectordb.py  # Database management
+│   ├── chatbot.py         # Main interface
+│   └── evaluate_*.py      # Evaluation tools
+├── utils/                 # Utility modules
+│   ├── rag_utils.py      # RAG pipeline components
+│   ├── db_utils.py       # Vector store management
+│   ├── embedding_utils.py # Embedding generation
+│   └── config.py         # Configuration
+├── raw_docs/             # Raw documentation
+├── external_docs/        # Processed documents
+├── vectorstore/         # Vector embeddings
+└── tests/              # Test suite
+```
 
-2. **Document Retrieval**
-   - Multi-collection semantic search
-   - Collection-specific weighting
-   - Enhanced context preservation
-   - Efficient ChromaDB integration
+## Setup
 
-3. **Response Generation**
-   - Context-aware response synthesis
-   - Code snippet generation
-   - Error handling and timeout protection
-   - Progress indication
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/reachy2_expert_agent.git
+cd reachy2_expert_agent
+```
 
-## Installation
-
-1. Create and activate a virtual environment:
+2. Create and activate a virtual environment:
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-2. Install dependencies:
+3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Set up environment variables:
-   - Copy `.env.example` to `.env`
-   - Add your OpenAI API key
-   - Configure debug settings if needed
+4. Create a `.env` file with your API keys:
+```
+MISTRAL_API_KEY=your_key_here
+DEBUG=false
+```
 
 ## Usage
 
-### Running the Chatbot
+1. Initialize the documentation database:
+```bash
+make refresh
+```
+
+2. Start the chatbot interface:
 ```bash
 python scripts/chatbot.py
 ```
 
-The chatbot interface provides:
-- Real-time query processing feedback
-- Example queries by category
-- Code snippet copying
-- Chat history management
+3. Access the interface at `http://localhost:7860`
 
-### Pipeline Testing
-```bash
-# Test the complete RAG pipeline
-python scripts/test_rag_pipeline.py
+## Development Commands
 
-# Test query decomposition
-python scripts/test_query_decomposition.py
+- **Clean generated files**:
+  ```bash
+  make clean
+  ```
 
-# Evaluate retrieval performance
-python scripts/evaluate_retrieval.py
-```
+- **Update documentation**:
+  ```bash
+  make scrape  # Fetch latest docs
+  make chunk   # Process documents
+  make update-db  # Update vector store
+  ```
 
-### Document Processing
-```bash
-# Process new documents
-python scripts/chunk_documents.py
+- **Run tests**:
+  ```bash
+  make test
+  ```
 
-# Update vector database
-python scripts/update_vectordb.py
-```
+- **Evaluate performance**:
+  ```bash
+  make evaluate
+  ```
 
-## Directory Structure
+## Documentation Sources
 
-```
-.
-├── scripts/
-│   ├── chatbot.py              # Interactive chatbot interface
-│   ├── chunk_documents.py      # Document processing
-│   ├── test_rag_pipeline.py    # Pipeline testing
-│   ├── update_vectordb.py      # Vector store management
-│   └── evaluate_retrieval.py   # Performance evaluation
-├── utils/
-│   ├── rag_utils.py           # Core RAG pipeline components
-│   ├── db_utils.py            # Vector store utilities
-│   ├── embedding_utils.py      # Embedding generation
-│   └── config.py              # Configuration management
-├── external_docs/             # Processed documents
-├── vectorstore/              # ChromaDB storage
-└── requirements.txt
-```
+1. **Reachy2 SDK**
+   - Official API documentation
+   - SDK examples and implementations
+   - Function and class documentation
 
-## Configuration
+2. **Vision Module**
+   - Vision API documentation
+   - Camera integration guides
+   - Computer vision examples
 
-The system uses a hierarchical configuration system:
-- Environment variables (via `.env`)
-- Model configurations (in `utils/config.py`)
-- RAG pipeline settings
-- Collection-specific weights and instructions
+3. **Tutorials**
+   - Interactive notebooks
+   - Step-by-step guides
+   - Best practices
+
+## Query Types
+
+The agent supports specialized handling for different query types:
+
+- 🔧 **Code Queries**: Implementation examples and API usage
+- 📖 **Concept Queries**: Architecture and design explanations
+- ⚠️ **Error Handling**: Troubleshooting and debugging
+- 🔌 **Setup Questions**: Installation and configuration
+- 👁️ **Vision Queries**: Camera and vision system usage
 
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
-3. Run the test suite before submitting changes:
-```bash
-python scripts/test_rag_pipeline.py
-python scripts/evaluate_retrieval.py
-```
-4. Submit a pull request
+3. Make your changes
+4. Run tests
+5. Submit a pull request
 
 ## License
 
-This project is licensed under the Apache License, Version 2.0 - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Pollen Robotics for the Reachy2 robot platform
+- The open-source community for various tools and libraries
+
+## Contact
+
+For questions or support:
+- Create an issue in the repository
+- Contact the project maintainers
 
 ```
 Copyright 2024 Pollen Robotics
@@ -143,11 +159,3 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
-
-## Contact
-
-For more information, please contact the project maintainers.
-
-## Project Status
-
-For detailed information about current progress and planned improvements, see [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md).

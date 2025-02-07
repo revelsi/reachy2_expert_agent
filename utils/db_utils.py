@@ -24,10 +24,32 @@ class VectorStore:
     
     # Collection-specific search instructions for better embeddings
     COLLECTION_INSTRUCTIONS = {
-        "api_docs_functions": "Represent this function documentation for retrieving relevant Python API methods and functions",
-        "api_docs_classes": "Represent this class documentation for retrieving relevant Python classes and their capabilities",
-        "reachy2_tutorials": "Represent this tutorial content for retrieving relevant robot programming examples and explanations",
-        "reachy2_sdk": "Represent this SDK documentation for retrieving relevant robot control and programming information"
+        "api_docs_functions": """Represent this OFFICIAL API function documentation for the Reachy2 SDK.
+This collection contains standalone functions with their signatures, documentation, and implementations.
+Use these functions for actual implementation as they are guaranteed to be part of the public API.""",
+
+        "api_docs_classes": """Represent this OFFICIAL API class documentation for the Reachy2 SDK.
+This collection contains two types of chunks:
+1. Class overviews with class docstrings and method summaries
+2. Individual method documentation with signatures and implementations
+Use these classes and methods for actual implementation as they are guaranteed to be part of the public API.""",
+
+        "api_docs_modules": """Represent this OFFICIAL module documentation for the Reachy2 SDK.
+This collection contains high-level module documentation and organization information.
+Use this to understand the SDK's structure and module purposes.""",
+
+        "reachy2_tutorials": """Represent this tutorial content which contains example code and explanations.
+Each chunk contains either tutorial explanations or complete working code examples.
+Note: While tutorials demonstrate usage patterns, they may contain custom helper functions.
+Always verify methods against the official API documentation.""",
+
+        "reachy2_sdk": """Represent this SDK example code and implementation patterns.
+Each chunk contains complete, working examples showing how to use the SDK.
+Note: While examples show implementation patterns, always verify methods against the API documentation.""",
+
+        "vision_examples": """Represent this Vision module example code and documentation.
+Each chunk contains complete examples of using the vision system and cameras.
+Note: These examples demonstrate vision-specific functionality and camera integration."""
     }
 
     def __init__(self, persist_directory: str = "vectorstore"):
@@ -38,17 +60,8 @@ class VectorStore:
         self.temp_dir = tempfile.mkdtemp()
         print(f"Using temporary directory: {self.temp_dir}")
         
-        # Initialize client with temporary directory and settings to reduce output
-        settings = chromadb.Settings(
-            anonymized_telemetry=False,
-            allow_reset=True,
-            is_persistent=True
-        )
-        
-        self.client = chromadb.PersistentClient(
-            path=self.temp_dir,
-            settings=settings
-        )
+        # Initialize client with temporary directory and settings
+        self._initialize_client()
         
         # If the persist directory exists, try to copy its contents
         if os.path.exists(persist_directory):
@@ -57,6 +70,23 @@ class VectorStore:
                 print(f"Copied existing database from {persist_directory}")
             except Exception as e:
                 print(f"Warning: Could not copy existing database: {e}")
+    
+    def _initialize_client(self):
+        """Initialize the ChromaDB client with appropriate settings."""
+        settings = chromadb.Settings(
+            anonymized_telemetry=False,
+            allow_reset=True,
+            is_persistent=True
+        )
+        
+        try:
+            self.client = chromadb.PersistentClient(
+                path=self.temp_dir,
+                settings=settings
+            )
+        except Exception as e:
+            print(f"Error initializing ChromaDB client: {e}")
+            raise
 
     def cleanup(self):
         """Clean up the vectorstore directory completely."""
@@ -64,9 +94,12 @@ class VectorStore:
         
         try:
             # Delete all collections first
-            for collection in self.client.list_collections():
-                print(f"Deleting collection: {collection.name}")
-                self.client.delete_collection(collection.name)
+            collections = self.client.list_collections()
+            for collection in collections:
+                try:
+                    self.client.delete_collection(collection)
+                except Exception as e:
+                    print(f"Warning: Could not delete collection {collection}: {e}")
             
             # Close the client connection
             del self.client
@@ -80,39 +113,42 @@ class VectorStore:
             self.temp_dir = tempfile.mkdtemp()
             print(f"Created new temporary directory: {self.temp_dir}")
             
+            # Reinitialize the client
+            self._initialize_client()
+            print("Initialized fresh vectorstore")
+            
         except Exception as e:
             print(f"Warning during cleanup: {e}")
-        
-        # Reinitialize the client with a fresh directory
-        self.client = chromadb.PersistentClient(path=self.temp_dir)
-        print("Initialized fresh vectorstore")
+            # Ensure client is reinitialized even if cleanup fails
+            self._initialize_client()
 
     def save(self):
         """Save the current state to the persist directory."""
         try:
             print('[DEBUG] Starting save operation...')
-            print('[DEBUG] Deleting client connection...')
+            
+            # Close client connection
             del self.client
+            print('[DEBUG] Closed client connection')
             
-            print('[DEBUG] Checking if persist directory exists...')
+            # Remove existing persist directory if it exists
             if os.path.exists(self.persist_directory):
-                print(f'[DEBUG] Persist directory exists at {self.persist_directory}, removing it...')
+                print(f'[DEBUG] Removing existing persist directory: {self.persist_directory}')
                 shutil.rmtree(self.persist_directory)
-                print('[DEBUG] Persist directory removed.')
-            else:
-                print('[DEBUG] No persist directory found.')
             
-            print(f'[DEBUG] Copying temporary directory from {self.temp_dir} to {self.persist_directory}...')
+            # Copy temporary directory to persist directory
+            print(f'[DEBUG] Copying from {self.temp_dir} to {self.persist_directory}')
             shutil.copytree(self.temp_dir, self.persist_directory)
-            print(f'[DEBUG] Copy complete. Database saved to {self.persist_directory}')
+            print(f'[DEBUG] Database saved to {self.persist_directory}')
             
-            print('[DEBUG] Reinitializing client with temporary directory...')
-            self.client = chromadb.PersistentClient(path=self.temp_dir)
-            print('[DEBUG] Save operation complete.')
+            # Reinitialize client
+            self._initialize_client()
+            print('[DEBUG] Reinitialized client')
+            
         except Exception as e:
-            print(f"[ERROR] Warning during save: {e}")
-            # Reinitialize client in case of error
-            self.client = chromadb.PersistentClient(path=self.temp_dir)
+            print(f"[ERROR] Error during save: {e}")
+            # Ensure client is reinitialized
+            self._initialize_client()
 
     def __del__(self):
         """Cleanup temporary directory on object destruction."""
@@ -192,14 +228,14 @@ class VectorStore:
         # Add collection-specific instruction to query
         instruction = self.COLLECTION_INSTRUCTIONS.get(collection_name, "")
         if instruction:
-            query_texts = [f"{instruction}:\n{text}" for text in query_texts]
+            query_texts = [
+                f"{instruction}\n\nQuery for relevant information from this source: {text}"
+                for text in query_texts
+            ]
         
-        # Suppress ChromaDB output during query
-        with suppress_stdout():
-            results = collection.query(
-                query_texts=query_texts,
-                n_results=n_results,
-                include=['documents', 'distances']
-            )
-        
-        return results 
+        # Only include necessary data in the query
+        return collection.query(
+            query_texts=query_texts,
+            n_results=n_results,
+            include=['documents', 'distances']
+        ) 

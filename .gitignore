@@ -15,47 +15,47 @@ lib64/
 parts/
 sdist/
 var/
+wheels/
 *.egg-info/
 .installed.cfg
+*.egg
 
-# Virtual environments
+# Virtual Environment
 venv/
-ENV/
 env/
+ENV/
+.env
+.venv
 env.bak/
 venv.bak/
-.env
 
 # IDE and Editor files
 .idea/
 .vscode/
 *.swp
 *.swo
-*.swn
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
 # Project specific
-raw_docs/
-external_docs/
-vectorstore/
-temp/
-tmp/
-.temp/
-__temp__/
-
-# Logs and outputs
+raw_docs/extracted/*
+raw_docs/reachy2_sdk_repo/*
+raw_docs/pollen_vision_repo/*
+raw_docs/reachy2_tutorials_repo/*
+external_docs/documents/*
+vectorstore/*
+.env
 *.log
-logs/
-test_output/
-evaluation_results/
-*_metrics.txt
-*_evaluation.txt
-test_metrics.txt
-baseline_metrics.txt
-new_metrics.txt
-chunk_test_output/
-progress_log.txt
+
+# Keep directory structure
+!raw_docs/extracted/.gitkeep
+!external_docs/documents/.gitkeep
+!vectorstore/.gitkeep
 
 # Model files and caches
 .cache/
@@ -66,22 +66,20 @@ models/
 *.ckpt
 *.bin
 
-# Configuration
-.env
-.env.local
-.env.*.local
-config.local.yaml
+# Logs and outputs
+logs/
+test_output/
+evaluation_results/
+*_metrics.txt
+*_evaluation.txt
+chunk_test_output/
+progress_log.txt
 
-# Debug
-debug/
-debug.log
-debug_output/
-
-# Documentation drafts
+# Documentation
 docs/_build/
 docs/_static/
 docs/_templates/
-*.draft.md
+site/
 
 # Temporary files
 .~*
@@ -89,6 +87,15 @@ docs/_templates/
 *.bak
 *.tmp
 *.temp
+temp/
+tmp/
+.temp/
+__temp__/
+
+# Debug files
+debug/
+debug.log
+debug_output/
 
 # Old directories to remove
 chatbot/
@@ -96,7 +103,6 @@ rag_pipeline/
 ui/
 
 # System files
-.DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
