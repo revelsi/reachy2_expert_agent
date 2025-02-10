@@ -1,5 +1,6 @@
 from langchain.docstore.document import Document
 import json
+from typing import List, Dict, Tuple
 
 
 def document_to_dict(doc: Document) -> dict:
@@ -75,4 +76,35 @@ def load_documents_from_json(input_file: str) -> list:
         
     except Exception as e:
         print(f"Error loading documents from {input_file}: {str(e)}")
-        return [] 
+        return []
+
+
+def prepare_documents_for_db(documents: List[Dict]) -> Tuple[List[str], List[Dict], List[str]]:
+    """Prepare documents for database insertion by extracting texts, metadata, and generating IDs."""
+    texts = []
+    metadatas = []
+    ids = []
+    
+    for i, doc in enumerate(documents):
+        # Extract content and metadata
+        content = doc.get('content', '')
+        metadata = doc.get('metadata', {})
+        
+        # Clean metadata - ensure all values are valid types
+        cleaned_metadata = {}
+        for key, value in metadata.items():
+            if value is None:
+                cleaned_metadata[key] = ""  # Replace None with empty string
+            elif isinstance(value, (str, int, float, bool)):
+                cleaned_metadata[key] = value
+            else:
+                cleaned_metadata[key] = str(value)  # Convert other types to string
+        
+        # Generate unique ID
+        doc_id = f"{cleaned_metadata.get('collection', 'doc')}_{cleaned_metadata.get('type', 'unknown')}_{i}"
+        
+        texts.append(content)
+        metadatas.append(cleaned_metadata)
+        ids.append(doc_id)
+    
+    return texts, metadatas, ids 

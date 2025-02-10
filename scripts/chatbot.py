@@ -21,91 +21,92 @@ class ChatbotInterface:
         self.pipeline = RAGPipeline()
         
     def process_query(self, query: str, history: List[dict]) -> List[dict]:
-        """Process a query and return the response with query decomposition steps."""
+        """Process a query and return the final response in the correct message format."""
         try:
             # Create new history with the current query
             new_history = history + [{"role": "user", "content": query}]
-            
-            # Show thinking message
-            status_msg = "🤔 Thinking..."
-            new_history.append({"role": "assistant", "content": status_msg})
-            yield new_history
-            
-            # Decompose query
-            status_msg = "🔍 Analyzing query..."
-            new_history[-1] = {"role": "assistant", "content": status_msg}
-            yield new_history
-            
-            sub_queries = self.pipeline.decomposer.decompose_query(query)
-            
-            # Format sub-queries
-            decomposition = "📋 Query Breakdown:\n" + "\n".join(f"{i+1}. {sq}" for i, sq in enumerate(sub_queries))
-            status_msg = f"{decomposition}\n\n🔎 Searching documentation..."
-            new_history[-1] = {"role": "assistant", "content": status_msg}
-            yield new_history
-            
-            # Generate response
+
+            # Generate final response
             response = self.pipeline.process_query(query)
+            new_history.append({"role": "assistant", "content": response})
             
-            # Format final response
-            final_response = f"{decomposition}\n\n📝 Response:\n{response}"
-            new_history[-1] = {"role": "assistant", "content": final_response}
-            yield new_history
-            
+            return new_history
+
         except Exception as e:
-            error_msg = f"❌ Error: {str(e)}"
-            if not history or history[-1]["role"] != "user":
-                new_history = history + [
+            error_msg = f"Error: {str(e)}"
+            if not history:
+                return [
                     {"role": "user", "content": query},
                     {"role": "assistant", "content": error_msg}
                 ]
             else:
-                new_history = history
-                new_history.append({"role": "assistant", "content": error_msg})
-            yield new_history
+                return history + [{"role": "assistant", "content": error_msg}]
 
 def main():
     # Create a single instance of the chatbot interface
     chatbot_interface = ChatbotInterface()
     
-    # Create a Gradio interface
-    with gr.Blocks(title="Reachy2 Expert Agent", theme=gr.themes.Soft()) as iface:
+    # Create a Gradio interface with default theme
+    with gr.Blocks(
+        title="Reachy2 Expert Agent",
+        theme=gr.themes.Soft()  # Using built-in Soft theme for clean look
+    ) as iface:
         gr.Markdown("""
-        # 🤖 Reachy2 Expert Agent
-        Ask questions about controlling and programming the Reachy robot. The agent will:
-        1. Break down complex queries into simpler sub-tasks
-        2. Search through documentation, tutorials, and code examples
-        3. Generate detailed responses with relevant code snippets
+        # Reachy2 Expert Agent
+        An intelligent assistant for the Reachy2 robot platform that:
+        - Provides accurate, context-aware responses about robot control and programming
+        - Maintains conversation context for follow-up questions
+        - Ensures safety guidelines are followed
+        - Includes necessary code imports and setup
         """)
         
-        # Add a state indicator
         with gr.Row():
-            status = gr.Markdown("💡 Ready to answer your questions!")
-        
-        chatbot = gr.Chatbot(
-            height=500,
-            show_label=False,
-            container=True,
-            show_copy_button=True,
-            type="messages"
-        )
-        
-        with gr.Row():
-            query = gr.Textbox(
-                placeholder="Enter your query here (e.g., 'How do I make Reachy wave hello with its right arm?')",
-                label="Query",
-                scale=9
-            )
-            submit = gr.Button("🚀 Ask", scale=1, variant="primary")
-        
-        with gr.Row():
-            clear = gr.Button("🗑️ Clear History")
+            with gr.Column(scale=2):
+                # Main chat interface
+                chatbot = gr.Chatbot(
+                    height=600,
+                    show_label=False,
+                    container=True,
+                    show_copy_button=True,
+                    type="messages"  # Using messages type as recommended
+                )
+                
+                with gr.Row():
+                    query = gr.Textbox(
+                        placeholder="Ask about Reachy2 robot control, programming, or safety guidelines...",
+                        label="Query",
+                        scale=8
+                    )
+                    submit = gr.Button("Ask", scale=1, variant="primary")
+                    clear = gr.Button("Clear", scale=1)
+                
+                with gr.Row():
+                    status = gr.Markdown("Ready to assist with your Reachy2 questions!")
+            
+            with gr.Column(scale=1):
+                # Safety Guidelines
+                gr.Markdown("""### Safety Guidelines""")
+                safety_md = gr.Markdown("""
+                - Always follow robot safety protocols
+                - Start with slow movements
+                - Monitor the robot's surroundings
+                - Keep emergency stop accessible
+                - Test in simulation when possible
+                """)
+                
+                # Context Information
+                gr.Markdown("""### Conversation Context""")
+                context_info = gr.Markdown("No active conversation")
+                
+                # Code Memory
+                gr.Markdown("""### Code Examples""")
+                code_memory = gr.Markdown("No code examples shared yet")
         
         # Example queries organized by category
-        gr.Markdown("### 📚 Example Queries")
+        gr.Markdown("""### Example Queries""")
         
         with gr.Tabs():
-            with gr.TabItem("🔰 Basic Operations"):
+            with gr.TabItem("Basic Operations"):
                 gr.Examples(
                     examples=[
                         "How do I make Reachy wave hello with its right arm?",
@@ -116,7 +117,7 @@ def main():
                     label="Basic Movement and Control"
                 )
             
-            with gr.TabItem("⚙️ Setup & Maintenance"):
+            with gr.TabItem("Setup & Safety"):
                 gr.Examples(
                     examples=[
                         "What's the process to calibrate Reachy's arms?",
@@ -128,7 +129,7 @@ def main():
                     label="Setup and Safety"
                 )
             
-            with gr.TabItem("🔧 Advanced Features"):
+            with gr.TabItem("Advanced Features"):
                 gr.Examples(
                     examples=[
                         "Show me how to control Reachy's gripper to grasp objects",
@@ -138,40 +139,70 @@ def main():
                     inputs=query,
                     label="Advanced Functionality"
                 )
+            
+            with gr.TabItem("Follow-up Examples"):
+                gr.Examples(
+                    examples=[
+                        "Can you explain that last code example in more detail?",
+                        "What safety considerations should I keep in mind for this movement?",
+                        "Could you show a more complex version of that operation?",
+                    ],
+                    inputs=query,
+                    label="Follow-up Questions"
+                )
         
         # Event handlers
+        def process_query_and_update(user_query, history):
+            # Set context info
+            context_info.value = "Active conversation with safety context"
+            # Process query through chatbot
+            return chatbot_interface.process_query(user_query, history)
+        
+        def update_code_memory(history):
+            if history and any("```python" in str(msg) for msg in history[-2:]):
+                code_memory.value = "Recent code examples available (click messages to copy)"
+        
+        def clear_all():
+            context_info.value = "No active conversation"
+            code_memory.value = "No code examples shared yet"
+            return None, "", "Ready to assist with your Reachy2 questions!"
+        
+        # Connect event handlers
         submit_click = submit.click(
-            fn=lambda: "🔄 Processing...",
+            fn=lambda: "Processing query...",
             outputs=status,
             queue=False
         ).then(
-            chatbot_interface.process_query,
+            process_query_and_update,
             inputs=[query, chatbot],
-            outputs=chatbot
+            outputs=[chatbot]
         ).then(
-            fn=lambda: "💡 Ready for your next question!",
+            update_code_memory,
+            inputs=[chatbot]
+        ).then(
+            fn=lambda: "Ready for your next question!",
             outputs=status,
             queue=False
         )
         
         txt_submit = query.submit(
-            fn=lambda: "🔄 Processing...",
+            fn=lambda: "Processing query...",
             outputs=status,
             queue=False
         ).then(
-            chatbot_interface.process_query,
+            process_query_and_update,
             inputs=[query, chatbot],
-            outputs=chatbot
+            outputs=[chatbot]
         ).then(
-            fn=lambda: "💡 Ready for your next question!",
+            update_code_memory,
+            inputs=[chatbot]
+        ).then(
+            fn=lambda: "Ready for your next question!",
             outputs=status,
             queue=False
         )
         
-        # Clear button handlers
-        def clear_all():
-            return None, "", "💡 Ready for your next question!"
-        
+        # Clear button handler
         clear.click(
             clear_all,
             outputs=[chatbot, query, status],

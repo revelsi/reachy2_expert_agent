@@ -3,8 +3,17 @@
 ```mermaid
 graph TD
     subgraph "User Interface"
-        UI[Gradio Interface] --> |Query| QP[Query Processor]
-        QP --> |Response| UI
+        UI[Gradio Interface] --> |Query| CH[Chat Handler]
+        CH --> |History| QP[Query Processor]
+        QP --> |Response| CH
+        CH --> |Display| UI
+    end
+
+    subgraph "Chat Management"
+        CH --> |Store| HM[History Manager]
+        HM --> |Context| CH
+        HM --> |Previous Code| CH
+        HM --> |Safety Context| CH
     end
 
     subgraph "Query Processing"
@@ -17,6 +26,12 @@ graph TD
         DR --> |Search| VS[(Vector Store)]
         VS --> |Results| RR[Re-Ranker]
         RR --> |Ranked Docs| RG[Response Generator]
+    end
+
+    subgraph "Safety Layer"
+        RG --> |Draft| SC[Safety Checker]
+        SC --> |Validate| SG[Safety Guidelines]
+        SG --> |Append| RG
     end
 
     subgraph "Document Processing"
@@ -36,7 +51,7 @@ graph TD
 
     subgraph "Models"
         M1[Mistral-Small] --> |Query Decomposition| QD
-        M2[InstructorXL] --> |Embeddings| EP
+        M2[Instructor Models] --> |Embeddings| EP
         M3[Cross-Encoder] --> |Re-ranking| RR
         M4[Mistral-Large] --> |Response Generation| RG
     end
@@ -46,25 +61,38 @@ graph TD
 
 ### 1. User Interface Layer
 - **Gradio Interface**: Web-based chat interface
-- **Query Processor**: Manages query flow and response generation
+- **Chat Handler**: Manages conversation flow and history
+- **Query Processor**: Coordinates query processing pipeline
 - **Progress Tracking**: Real-time status updates
 
-### 2. Query Processing Layer
+### 2. Chat Management Layer
+- **History Manager**: Maintains conversation context
+- **Context Tracking**: Links related queries and responses
+- **Code Memory**: Tracks previously shared code examples
+- **Safety Context**: Maintains safety guidelines across conversation
+
+### 3. Query Processing Layer
 - **Query Decomposer**: Breaks down complex queries
 - **Query Type Detector**: Identifies query category
 - **Collection Weighting**: Dynamic collection importance
 
-### 3. Document Retrieval Layer
+### 4. Document Retrieval Layer
 - **Vector Store**: ChromaDB-based document storage
 - **Re-Ranker**: Cross-encoder based re-ranking
 - **Response Generator**: Context-aware response synthesis
 
-### 4. Document Processing Layer
+### 5. Safety Layer
+- **Safety Checker**: Validates responses against guidelines
+- **Safety Guidelines**: Category-specific safety rules
+- **Validation Rules**: Movement, gripper, vision safety
+- **Context Tracking**: Maintains safety context across chat
+
+### 6. Document Processing Layer
 - **Doc Scrapers**: Multi-source documentation collection
 - **Doc Chunker**: Semantic document segmentation
 - **Embedding Pipeline**: Vector generation and storage
 
-### 5. Collections Layer
+### 7. Collections Layer
 - **api_docs_functions**: Function documentation
 - **api_docs_classes**: Class documentation
 - **api_docs_modules**: Module documentation
@@ -72,37 +100,57 @@ graph TD
 - **vision_examples**: Vision system examples
 - **reachy2_tutorials**: Tutorial content
 
-### 6. Model Layer
+### 8. Model Layer
 - **Mistral-Small**: Query decomposition
-- **InstructorXL**: Document embeddings
+- **Instructor Models**: Document embeddings
+-   - InstructorXL (default): Highest quality, slower (768d)
+-   - InstructorLarge: Good balance of speed/quality (768d)
+-   - InstructorBase: Fastest, may sacrifice some quality (768d)
 - **Cross-Encoder**: Result re-ranking
 - **Mistral-Large**: Response generation
 
 ## Data Flow
 
-1. **Query Input**
-   - User submits query through Gradio interface
-   - Query processor initiates pipeline
+1. **Chat Initialization**
+   - User starts conversation through interface
+   - Chat handler initializes history
+   - Safety context is established
 
-2. **Query Analysis**
+2. **Query Processing**
+   - Chat handler provides conversation context
    - Query decomposer breaks down complex queries
    - Query type detector determines category
    - Collection weights are assigned
 
-3. **Document Retrieval**
+3. **Context Management**
+   - Previous queries and responses tracked
+   - Code examples maintained for reference
+   - Safety guidelines accumulated
+   - Conversation flow preserved
+
+4. **Document Retrieval**
    - Vector store searches across collections
-   - Results are weighted by collection importance
+   - Results weighted by collection importance
    - Cross-encoder re-ranks results
+   - Context assembled with history
 
-4. **Response Generation**
-   - Context is assembled from top results
-   - Response is generated with code examples
-   - Response is formatted and returned
+5. **Safety Validation**
+   - Response draft generated
+   - Safety checker validates content
+   - Guidelines appended based on context
+   - Previous safety context considered
 
-5. **Continuous Updates**
-   - Documentation is regularly scraped
-   - New content is processed and embedded
-   - Vector store is updated
+6. **Response Generation**
+   - Context assembled from multiple sources
+   - Code examples generated with imports
+   - Safety guidelines integrated
+   - Response formatted for chat
+
+7. **Continuous Updates**
+   - Documentation regularly scraped
+   - New content processed and embedded
+   - Vector store updated
+   - Safety guidelines refined
 
 ## System Requirements
 
@@ -110,4 +158,5 @@ graph TD
 - ChromaDB
 - Sufficient storage for vector database
 - Required API keys
-- Memory for processing large documents 
+- Memory for processing large documents
+- Persistent storage for chat history 

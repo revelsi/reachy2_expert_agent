@@ -1,8 +1,17 @@
+# Environment variables
+.env
+
+# Embedding cache
+.cache/
+sentence_transformers/
+
+# Vector store
+vectorstore/
+
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
 .Python
 build/
 develop-eggs/
@@ -22,24 +31,16 @@ wheels/
 
 # Virtual Environment
 venv/
-env/
 ENV/
-.env
-.venv
-env.bak/
-venv.bak/
 
-# IDE and Editor files
+# IDE
 .idea/
 .vscode/
 *.swp
 *.swo
+
+# OS
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 
 # Project specific
@@ -48,8 +49,6 @@ raw_docs/reachy2_sdk_repo/*
 raw_docs/pollen_vision_repo/*
 raw_docs/reachy2_tutorials_repo/*
 external_docs/documents/*
-vectorstore/*
-.env
 *.log
 
 # Keep directory structure
@@ -58,7 +57,6 @@ vectorstore/*
 !vectorstore/.gitkeep
 
 # Model files and caches
-.cache/
 .pytest_cache/
 models/
 *.pt

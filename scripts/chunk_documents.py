@@ -197,41 +197,197 @@ def chunk_api_docs(raw_docs: List[Dict]) -> Dict[str, List[Dict]]:
     
     return chunks
 
-def extract_code_blocks(text: str) -> List[Dict[str, str]]:
-    """Extract code blocks and their surrounding context."""
+def extract_code_blocks(text: str) -> List[Dict]:
+    """Extract code blocks and their surrounding context from text."""
     blocks = []
     lines = text.split('\n')
-    current_block = {'context': [], 'code': []}
-    in_code = False
-    code_fence_count = 0  # Track nested code fences
+    current_context = []
+    current_code = []
+    in_code_block = False
     
     for line in lines:
-        if line.startswith('```'):
-            if 'python' in line:
-                code_fence_count += 1
-                in_code = True
-                if current_block['context'] and code_fence_count == 1:
-                    blocks.append(dict(current_block))
-                    current_block = {'context': [], 'code': []}
-            elif in_code:
-                code_fence_count -= 1
-                if code_fence_count == 0:
-                    in_code = False
-                    if current_block['code']:
-                        blocks.append(dict(current_block))
-                        current_block = {'context': [], 'code': []}
-        elif in_code:
-            current_block['code'].append(line)
+        if line.strip().startswith('```python'):
+            in_code_block = True
+            if current_context:
+                blocks.append({'context': current_context, 'code': []})
+                current_context = []
+        elif line.strip() == '```' and in_code_block:
+            in_code_block = False
+            if current_code:
+                blocks.append({'context': current_context, 'code': current_code})
+                current_context = []
+                current_code = []
+        elif in_code_block:
+            current_code.append(line)
         else:
-            current_block['context'].append(line)
+            current_context.append(line)
     
-    # Handle any unclosed code blocks
-    if in_code and current_block['code']:
-        blocks.append(dict(current_block))
-    elif current_block['context']:
-        blocks.append(dict(current_block))
+    # Add any remaining content
+    if current_context:
+        blocks.append({'context': current_context, 'code': []})
     
     return blocks
+
+def chunk_markdown_docs(raw_docs: List[Dict]) -> List[Dict]:
+    """Process markdown documentation into semantic chunks."""
+    chunks = []
+    
+    for doc in raw_docs:
+        try:
+            print(f"\nProcessing document: {doc.get('metadata', {}).get('source', 'unknown')}")
+            content = doc['content']
+            metadata = doc['metadata']
+            
+            # Split content at major headers (h1 and h2) while capturing header hierarchy
+            sections = []
+            current_section = []
+            header_stack = []  # Track header hierarchy
+            lines = content.split('\n')
+            
+            # Debug: Print initial content size
+            print(f"Document size: {len(content)} characters")
+            
+            for line in lines:
+                try:
+                    # New section only at h1 and h2 headers to keep related content together
+                    if line.strip().startswith('#') and (
+                        line.strip().startswith('# ') or 
+                        line.strip().startswith('## ')
+                    ):
+                        # Save previous section if exists and not too small
+                        if current_section:
+                            section_content = '\n'.join(current_section)
+                            # Only create new section if significant content
+                            if len(section_content) > 100:
+                                sections.append({
+                                    'content': section_content,
+                                    'headers': list(header_stack)
+                                })
+                                print(f"Created section with {len(section_content)} chars at header: {line.strip()}")
+                                current_section = []
+                            
+                        # Update header stack
+                        header_level = len(line) - len(line.lstrip('#'))
+                        # Pop headers until we're at the right level
+                        while header_stack and len(header_stack) >= header_level:
+                            header_stack.pop()
+                        header_stack.append(line.strip())
+                    
+                    current_section.append(line)
+                except Exception as e:
+                    print(f"Error processing line: {line}")
+                    print(f"Error: {str(e)}")
+                    continue
+            
+            # Add final section if significant
+            if current_section:
+                section_content = '\n'.join(current_section)
+                if len(section_content) > 100:
+                    sections.append({
+                        'content': section_content,
+                        'headers': list(header_stack)
+                    })
+                    print(f"Created final section with {len(section_content)} chars")
+            
+            print(f"Found {len(sections)} sections")
+            
+            # Process each section
+            for i, section in enumerate(sections):
+                try:
+                    # Extract code blocks and their context
+                    blocks = extract_code_blocks(section['content'])
+                    current_chunk = []
+                    current_size = 0
+                    
+                    # Get section navigation safely
+                    prev_header = sections[i-1]['headers'][-1] if i > 0 and sections[i-1]['headers'] else None
+                    next_header = sections[i+1]['headers'][-1] if i < len(sections)-1 and sections[i+1]['headers'] else None
+                    
+                    # Add header context from parent sections
+                    section_context = '\n'.join(section['headers']) + '\n\n' if section['headers'] else ''
+                    
+                    # If section is small enough, keep it as one chunk
+                    if len(section['content']) <= MAX_CHUNK_SIZE:
+                        chunks.append({
+                            'content': section['content'],
+                            'metadata': {
+                                **metadata,
+                                'chunk_index': len(chunks),
+                                'has_code': '```python' in section['content'],
+                                'section_path': ' > '.join(section['headers']) if section['headers'] else '',
+                                'prev_section': prev_header,
+                                'next_section': next_header
+                            }
+                        })
+                        continue
+                    
+                    # Combine blocks that would fit together
+                    combined_blocks = []
+                    current_combined = []
+                    combined_size = 0
+                    
+                    for block in blocks:
+                        block_text = '\n'.join(block['context'])
+                        if block['code']:
+                            block_text += '\n```python\n' + '\n'.join(block['code']) + '\n```\n'
+                        
+                        # If adding this block would exceed chunk size, save current combination
+                        if combined_size + len(block_text) > MAX_CHUNK_SIZE and current_combined:
+                            combined_blocks.append('\n'.join(current_combined))
+                            current_combined = [block_text]
+                            combined_size = len(block_text)
+                        else:
+                            current_combined.append(block_text)
+                            combined_size += len(block_text)
+                    
+                    # Add any remaining combined blocks
+                    if current_combined:
+                        combined_blocks.append('\n'.join(current_combined))
+                    
+                    # Process combined blocks
+                    for block_content in combined_blocks:
+                        if len(block_content) <= MAX_CHUNK_SIZE:
+                            chunks.append({
+                                'content': block_content,
+                                'metadata': {
+                                    **metadata,
+                                    'chunk_index': len(chunks),
+                                    'has_code': '```python' in block_content,
+                                    'section_path': ' > '.join(section['headers']) if section['headers'] else '',
+                                    'prev_section': prev_header,
+                                    'next_section': next_header
+                                }
+                            })
+                        else:
+                            # Split while preserving markdown structure
+                            sub_chunks = split_text(block_content, MAX_CHUNK_SIZE, OVERLAP_SIZE)
+                            for j, sub_chunk in enumerate(sub_chunks):
+                                chunks.append({
+                                    'content': sub_chunk,
+                                    'metadata': {
+                                        **metadata,
+                                        'chunk_index': len(chunks),
+                                        'has_code': '```python' in sub_chunk,
+                                        'section_path': ' > '.join(section['headers']) if section['headers'] else '',
+                                        'sub_chunk': j + 1,
+                                        'total_sub_chunks': len(sub_chunks),
+                                        'prev_section': prev_header,
+                                        'next_section': next_header
+                                    }
+                                })
+                    
+                except Exception as e:
+                    print(f"Error processing section {i}: {str(e)}")
+                    continue
+            
+            print(f"Created {len(chunks)} chunks")
+            
+        except Exception as e:
+            print(f"Error processing document {doc.get('metadata', {}).get('source', 'unknown')}: {str(e)}")
+            print("Document content preview:", doc.get('content', '')[:200])
+            continue
+    
+    return chunks
 
 def chunk_examples(raw_docs: List[Dict], collection: str) -> List[Dict]:
     """Process code examples and tutorials into chunks."""
@@ -333,26 +489,21 @@ def chunk_examples(raw_docs: List[Dict], collection: str) -> List[Dict]:
                         current_size = 0
                     
                     if block_size > max_chunk_size:
-                        # Split large blocks while preserving structure
-                        if block['context']:
-                            chunks.append({
-                                'content': '\n'.join(block['context']),
-                                'metadata': {
-                                    **metadata,
-                                    'chunk_index': len(chunks),
-                                    'has_code': False
-                                }
-                            })
+                        # Keep context with first part of code
+                        context = '\n'.join(block['context'])
+                        code_parts = split_text('\n'.join(block['code']), max_chunk_size - len(context))
                         
-                        code_text = '\n'.join(block['code'])
-                        for i, code_part in enumerate(split_text(code_text, max_chunk_size - 100)):
+                        for i, code_part in enumerate(code_parts):
+                            chunk_content = context if i == 0 else f"(Continued from part {i})\n"
+                            chunk_content += f"\n```python\n{code_part}\n```\n"
                             chunks.append({
-                                'content': f"```python\n{code_part}\n```",
+                                'content': chunk_content,
                                 'metadata': {
                                     **metadata,
                                     'chunk_index': len(chunks),
                                     'has_code': True,
-                                    'code_part': i + 1
+                                    'code_part': i + 1,
+                                    'total_parts': len(code_parts)
                                 }
                             })
                     else:
@@ -387,28 +538,44 @@ def main():
                 os.remove(os.path.join(OUTPUT_DIR, file))
     
     # Process API documentation
+    print("\nProcessing API documentation...")
     api_docs = load_json_file(os.path.join(RAW_DOCS_DIR, "raw_api_docs.json"))
     if api_docs:
+        print(f"Found {len(api_docs)} API documents")
         chunks = chunk_api_docs(api_docs)
         save_chunks(chunks['modules'], os.path.join(OUTPUT_DIR, "api_docs_modules.json"))
         save_chunks(chunks['classes'], os.path.join(OUTPUT_DIR, "api_docs_classes.json"))
         save_chunks(chunks['functions'], os.path.join(OUTPUT_DIR, "api_docs_functions.json"))
     
+    # Process Reachy 2 documentation
+    print("\nProcessing Reachy 2 documentation...")
+    reachy2_docs = load_json_file(os.path.join(RAW_DOCS_DIR, "raw_reachy2_docs.json"))
+    if reachy2_docs:
+        print(f"Found {len(reachy2_docs)} Reachy 2 documents")
+        chunks = chunk_markdown_docs(reachy2_docs)
+        save_chunks(chunks, os.path.join(OUTPUT_DIR, "reachy2_docs.json"))
+    
     # Process SDK examples
+    print("\nProcessing SDK examples...")
     sdk_examples = load_json_file(os.path.join(RAW_DOCS_DIR, "raw_sdk_examples.json"))
     if sdk_examples:
+        print(f"Found {len(sdk_examples)} SDK examples")
         chunks = chunk_examples(sdk_examples, "reachy2_sdk")
         save_chunks(chunks, os.path.join(OUTPUT_DIR, "reachy2_sdk.json"))
     
     # Process Vision examples
+    print("\nProcessing Vision examples...")
     vision_examples = load_json_file(os.path.join(RAW_DOCS_DIR, "raw_vision_examples.json"))
     if vision_examples:
+        print(f"Found {len(vision_examples)} Vision examples")
         chunks = chunk_examples(vision_examples, "vision_examples")
         save_chunks(chunks, os.path.join(OUTPUT_DIR, "vision_examples.json"))
     
     # Process tutorials
+    print("\nProcessing tutorials...")
     tutorials = load_json_file(os.path.join(RAW_DOCS_DIR, "raw_tutorials.json"))
     if tutorials:
+        print(f"Found {len(tutorials)} tutorials")
         chunks = chunk_examples(tutorials, "reachy2_tutorials")
         save_chunks(chunks, os.path.join(OUTPUT_DIR, "reachy2_tutorials.json"))
     

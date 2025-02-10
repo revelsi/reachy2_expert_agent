@@ -180,4 +180,26 @@ This project is licensed under the Apache License 2.0 - see the `LICENSE` file f
 For questions or support:
 - Project maintainers
 - Issue tracker
-- Community forums 
+- Community forums
+
+### Embedding Configuration
+
+The system supports multiple embedding model configurations:
+
+1. Local Embedding (Default):
+   - Uses Instructor models for high-quality embeddings
+   - Options:
+     - InstructorXL: Highest quality, slower processing
+     - InstructorLarge: Good balance of speed and quality
+     - InstructorBase: Fastest processing
+   - All models produce 768-dimensional embeddings
+   - Automatically uses Apple Silicon (MPS) acceleration when available
+
+2. HuggingFace Inference API:
+   - Alternative deployment option
+   - Requires HUGGINGFACE_API_TOKEN in .env
+   - Can use custom endpoint via HUGGINGFACE_ENDPOINT_URL
+
+To configure:
+1. Set model in utils/embedding_utils.py (EmbeddingGenerator class)
+2. For HuggingFace API, use EmbeddingGeneratorHF class instead 

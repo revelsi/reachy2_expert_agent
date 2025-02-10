@@ -23,6 +23,7 @@ scrape:
 	python scripts/scrape_sdk_docs.py
 	python scripts/scrape_vision_docs.py
 	python scripts/scrape_tutorials.py
+	python scripts/scrape_reachy2_docs.py
 	@echo "Documentation scraping complete"
 
 # Process documents into chunks
@@ -41,8 +42,14 @@ refresh: clean scrape chunk update-db
 
 # Run tests
 test:
-	python -m pytest tests/
-	@echo "Tests complete"
+	@echo "Running test suite..."
+	@echo "\nTesting markdown chunking..."
+	python scripts/test_markdown_chunking.py
+	@echo "\nTesting Reachy 2 documentation..."
+	python scripts/test_reachy2_docs.py
+	@echo "\nTesting chunk analysis..."
+	python scripts/test_chunks.py
+	@echo "\nTests complete"
 
 # Run evaluation
 evaluate:
