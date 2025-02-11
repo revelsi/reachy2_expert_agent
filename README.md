@@ -83,10 +83,10 @@ reachy2_expert_agent/
 
 5. Initialize the vector database:
    ```bash
-   make refresh  # Basic refresh without Reachy2 docs
-   # or
-   make refresh-full  # Full refresh including Reachy2 docs
+   make refresh
    ```
+
+   > **Note**: While `make refresh-full` is available to include Reachy2 docs, it's recommended to use `make refresh` as it provides all the necessary documentation for the agent to function properly. The full refresh option is still experimental and may include incomplete documentation.
 
 ## Development
 
