@@ -8,7 +8,7 @@ from pprint import pprint
 # Add parent directory to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from scripts.chunk_documents import chunk_markdown_docs, extract_code_blocks
+from tools.chunk_documents import chunk_markdown_docs, extract_code_blocks
 
 def test_header_hierarchy():
     """Test that header hierarchy is correctly preserved."""

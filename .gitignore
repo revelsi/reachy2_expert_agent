@@ -6,32 +6,37 @@
 sentence_transformers/
 
 # Vector store
-vectorstore/
+data/vectorstore/*
+!data/vectorstore/.gitkeep
 
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# Virtual Environment
 venv/
 ENV/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
 
 # IDE
 .idea/
@@ -44,17 +49,12 @@ ENV/
 Thumbs.db
 
 # Project specific
-raw_docs/extracted/*
-raw_docs/reachy2_sdk_repo/*
-raw_docs/pollen_vision_repo/*
-raw_docs/reachy2_tutorials_repo/*
-external_docs/documents/*
-*.log
-
-# Keep directory structure
-!raw_docs/extracted/.gitkeep
-!external_docs/documents/.gitkeep
-!vectorstore/.gitkeep
+data/raw_docs/*
+!data/raw_docs/.gitkeep
+data/external_docs/*
+!data/external_docs/.gitkeep
+data/cache/*
+!data/cache/.gitkeep
 
 # Model files and caches
 .pytest_cache/
@@ -66,11 +66,11 @@ models/
 
 # Logs and outputs
 logs/
+*.log
 test_output/
 evaluation_results/
 *_metrics.txt
 *_evaluation.txt
-chunk_test_output/
 progress_log.txt
 
 # Documentation
@@ -95,6 +95,20 @@ debug/
 debug.log
 debug_output/
 
+# System files
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Gradio specific
+gradio_cached_examples/
+flagged/
+*.db
+gradio_queue.db
+
 # Old directories to remove
 chatbot/
 rag_pipeline/
@@ -111,12 +125,19 @@ Thumbs.db
 # Unwanted large binary files
 libtorch_cpu.dylib
 
-# Gradio specific
-gradio_cached_examples/
-flagged/
-*.db
-gradio_queue.db
-
 # Your unwanted environment folders (adjust names if needed)
 newenv/
-new_env/ 
+new_env/
+
+# New directory structure
+data/vectorstore/*
+!data/vectorstore/.gitkeep
+data/raw_docs/*
+!data/raw_docs/.gitkeep
+data/external_docs/*
+!data/external_docs/.gitkeep
+
+# Logs
+*.log
+logs/
+tmp/ 

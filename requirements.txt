@@ -3,6 +3,7 @@ gradio>=4.16.0
 requests>=2.31.0
 python-dotenv>=1.0.0
 tqdm>=4.65.0
+langchain>=0.1.0
 
 # Machine Learning & NLP
 torch>=2.2.0

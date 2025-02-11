@@ -1,148 +1,126 @@
 # Reachy2 Expert Agent
 
-An intelligent documentation-aware assistant for the Reachy2 robot platform. This agent helps developers and users by providing accurate, context-aware responses about robot control, programming, and usage.
+An intelligent assistant for the Reachy2 robot platform that provides accurate, context-aware responses about robot control and programming.
 
 ## Features
 
-- 🤖 **Intelligent Query Processing**: Breaks down complex queries into manageable sub-tasks
-- 📚 **Multi-Source Documentation**: Integrates API docs, tutorials, and code examples
-- 🔍 **Context-Aware Responses**: Provides relevant code snippets and explanations
-- 🛠️ **Comprehensive Coverage**: Covers SDK, Vision module, and tutorials
-- 🔄 **Regular Updates**: Stays current with the latest documentation
+- Context-aware responses using RAG (Retrieval-Augmented Generation)
+- Real-time code generation and execution
+- Safety-first approach with built-in guidelines
+- Comprehensive documentation search
+- Interactive chat interface
 
 ## Project Structure
 
 ```
-.
-├── scripts/                 # Core processing scripts
-│   ├── scrape_*.py         # Documentation scrapers
-│   ├── chunk_documents.py  # Document processing
-│   ├── update_vectordb.py  # Database management
-│   ├── chatbot.py         # Main interface
-│   └── evaluate_*.py      # Evaluation tools
-├── utils/                 # Utility modules
-│   ├── rag_utils.py      # RAG pipeline components
-│   ├── db_utils.py       # Vector store management
-│   ├── embedding_utils.py # Embedding generation
-│   └── config.py         # Configuration
-├── raw_docs/             # Raw documentation
-├── external_docs/        # Processed documents
-├── vectorstore/         # Vector embeddings
-└── tests/              # Test suite
+reachy2_expert_agent/
+├── src/                    # Source code
+│   ├── chatbot.py         # Main chatbot application
+│   └── utils/             # Core utilities
+│       ├── config.py      # Configuration settings
+│       ├── rag_utils.py   # RAG pipeline utilities
+│       ├── db_utils.py    # Database operations
+│       └── embedding_utils.py  # Embedding generation
+├── tests/                 # Test suite
+│   ├── integration/      # Integration tests
+│   ├── unit/            # Unit tests
+│   └── conftest.py      # Test configuration
+├── tools/                # Utility scripts
+│   ├── chunk_documents.py    # Document chunking
+│   ├── update_vectordb.py    # Vector database updates
+│   ├── scrape_sdk_docs.py    # SDK documentation scraper
+│   ├── scrape_vision_docs.py # Vision documentation scraper
+│   ├── scrape_tutorials.py   # Tutorials scraper
+│   ├── scrape_reachy2_docs.py # Main documentation scraper
+│   ├── analyze_coverage.py   # Coverage analysis
+│   └── evaluate_retrieval.py # Retrieval evaluation
+├── data/                 # Data directory
+│   ├── raw_docs/        # Raw documentation
+│   ├── external_docs/   # Processed documentation
+│   ├── vectorstore/    # Vector database
+│   └── cache/          # Cache directory
+└── docs/               # Documentation
 ```
 
 ## Setup
 
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/reachy2_expert_agent.git
-cd reachy2_expert_agent
-```
+1. Create a Python virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Unix/macOS
+   # or
+   .\venv\Scripts\activate  # On Windows
+   ```
 
-2. Create and activate a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-3. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+3. Install in development mode:
+   ```bash
+   make install-dev
+   ```
 
-4. Create a `.env` file with your API keys:
-```
-MISTRAL_API_KEY=your_key_here
-DEBUG=false
-```
+4. Set up environment variables:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your API keys
+   ```
+
+5. Initialize the vector database:
+   ```bash
+   make refresh  # Basic refresh without Reachy2 docs
+   # or
+   make refresh-full  # Full refresh including Reachy2 docs
+   ```
+
+## Development
+
+1. Run tests:
+   ```bash
+   make test
+   ```
+
+2. Run code quality checks:
+   ```bash
+   make lint
+   make format
+   ```
+
+3. Update documentation:
+   ```bash
+   make docs
+   ```
+
+4. Evaluate retrieval performance:
+   ```bash
+   make evaluate
+   ```
 
 ## Usage
 
-1. Initialize the documentation database:
+Run the chatbot:
 ```bash
-make refresh
+python src/chatbot.py
 ```
-
-2. Start the chatbot interface:
-```bash
-python scripts/chatbot.py
-```
-
-3. Access the interface at `http://localhost:7860`
-
-## Development Commands
-
-- **Clean generated files**:
-  ```bash
-  make clean
-  ```
-
-- **Update documentation**:
-  ```bash
-  make scrape  # Fetch latest docs
-  make chunk   # Process documents
-  make update-db  # Update vector store
-  ```
-
-- **Run tests**:
-  ```bash
-  make test
-  ```
-
-- **Evaluate performance**:
-  ```bash
-  make evaluate
-  ```
-
-## Documentation Sources
-
-1. **Reachy2 SDK**
-   - Official API documentation
-   - SDK examples and implementations
-   - Function and class documentation
-
-2. **Vision Module**
-   - Vision API documentation
-   - Camera integration guides
-   - Computer vision examples
-
-3. **Tutorials**
-   - Interactive notebooks
-   - Step-by-step guides
-   - Best practices
-
-## Query Types
-
-The agent supports specialized handling for different query types:
-
-- 🔧 **Code Queries**: Implementation examples and API usage
-- 📖 **Concept Queries**: Architecture and design explanations
-- ⚠️ **Error Handling**: Troubleshooting and debugging
-- 🔌 **Setup Questions**: Installation and configuration
-- 👁️ **Vision Queries**: Camera and vision system usage
 
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Run tests
+4. Run tests and linting
 5. Submit a pull request
 
 ## License
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License 2.0 - see the LICENSE file for details.
 
 ## Acknowledgments
 
-- Pollen Robotics for the Reachy2 robot platform
-- The open-source community for various tools and libraries
-
-## Contact
-
-For questions or support:
-- Create an issue in the repository
-- Contact the project maintainers
+- Pollen Robotics for the Reachy2 platform
+- Contributors and maintainers
 
 ```
 Copyright 2024 Pollen Robotics

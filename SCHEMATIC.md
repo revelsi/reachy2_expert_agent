@@ -110,13 +110,13 @@ graph TD
 - **Embedding Pipeline**: Vector generation and storage
 
 ### 8. Collections Layer
-- **api_docs_functions**: Function documentation
-- **api_docs_classes**: Class documentation
-- **api_docs_modules**: Module documentation
-- **reachy2_sdk**: SDK examples
-- **vision_examples**: Vision system examples
-- **reachy2_tutorials**: Tutorial content
-- **reachy2_docs**: Official Reachy2 documentation
+- **api_docs_functions**: `data/external_docs/api_docs_functions.json`
+- **api_docs_classes**: `data/external_docs/api_docs_classes.json`
+- **api_docs_modules**: `data/external_docs/api_docs_modules.json`
+- **reachy2_sdk**: `data/external_docs/reachy2_sdk.json`
+- **vision_examples**: `data/external_docs/vision_examples.json`
+- **reachy2_tutorials**: `data/external_docs/reachy2_tutorials.json`
+- **reachy2_docs**: `data/external_docs/reachy2_docs.json`
 
 ### 9. Model Layer
 - **Mistral-Small**: Query decomposition
@@ -201,3 +201,98 @@ Each operation includes:
 - Required API keys
 - Memory for processing large documents
 - Persistent storage for chat history 
+
+## Project Structure
+
+```
+reachy2_expert_agent/
+├── src/                    # Source code
+│   ├── __init__.py
+│   ├── chatbot.py         # Main chatbot implementation
+│   └── utils/             # Utility modules
+│       ├── config.py      # Configuration settings
+│       ├── rag_utils.py   # RAG pipeline utilities
+│       ├── db_utils.py    # Database operations
+│       └── embedding_utils.py  # Embedding generation
+├── tests/                 # Test suite
+│   ├── __init__.py
+│   ├── conftest.py       # Test configuration
+│   ├── integration/      # Integration tests
+│   └── unit/            # Unit tests
+├── tools/                # Utility scripts
+│   ├── chunk_documents.py    # Document chunking
+│   ├── update_vectordb.py    # Vector database updates
+│   ├── scrape_sdk_docs.py    # SDK documentation scraper
+│   ├── scrape_vision_docs.py # Vision documentation scraper
+│   ├── scrape_tutorials.py   # Tutorials scraper
+│   ├── scrape_reachy2_docs.py # Main documentation scraper
+│   ├── analyze_coverage.py   # Coverage analysis
+│   └── evaluate_retrieval.py # Retrieval evaluation
+├── data/                  # Data directory
+│   ├── raw_docs/         # Raw documentation
+│   ├── external_docs/    # Processed documentation
+│   ├── vectorstore/      # Vector database
+│   └── cache/           # Temporary data
+├── docs/                 # Project documentation
+├── requirements.txt      # Dependencies
+└── README.md            # Project overview
+```
+
+## Environment Setup
+
+```bash
+# Required environment variables (.env file)
+MISTRAL_API_KEY=your_mistral_api_key    # Required for LLM operations
+DEBUG=false                             # Enable/disable debug mode
+```
+
+## Development Workflow
+
+1. **Environment Setup**
+   ```bash
+   make venv              # Create virtual environment
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
+
+2. **Code Quality**
+   ```bash
+   make format           # Format code
+   make lint            # Run linters
+   make test            # Run tests
+   ```
+
+3. **Documentation Pipeline**
+   ```bash
+   make scrape          # Collect documentation
+   make chunk           # Process into chunks
+   make update-db       # Update vector store
+   ```
+
+4. **Continuous Integration**
+   - Pre-commit hooks for code quality
+   - Automated tests on push
+   - Documentation updates
+   - Vector store validation
+
+## Data Management
+
+1. **Raw Documentation** (`data/raw_docs/`)
+   - Cloned repositories
+   - Extracted documentation
+   - Temporary processing files
+
+2. **External Documentation** (`data/external_docs/`)
+   - Processed JSON files
+   - Chunked documentation
+   - Indexed content
+
+3. **Vector Database** (`data/vectorstore/`)
+   - ChromaDB collections
+   - Embedding vectors
+   - Metadata storage
+
+4. **Cache** (`data/cache/`)
+   - Temporary processing data
+   - Model caches
+   - Intermediate files 
