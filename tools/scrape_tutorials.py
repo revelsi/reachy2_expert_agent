@@ -4,6 +4,7 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import nbformat
@@ -22,22 +23,49 @@ REPO_DIR = os.path.join(RAW_DOCS_DIR, "reachy2_tutorials_repo")
 
 def clone_or_update_repo():
     """Clone the repository if it doesn't exist, or pull the latest changes."""
-    try:
-        if not os.path.exists(REPO_DIR):
-            print(f"Cloning repository: {GIT_URL} into {REPO_DIR}...")
-            subprocess.run(["git", "clone", GIT_URL, REPO_DIR], check=True)
-            print("Repository cloned successfully")
-        else:
-            print("Repository exists. Pulling latest changes...")
-            subprocess.run(["git", "-C", REPO_DIR, "pull"], check=True)
-            print("Repository updated successfully")
-        return True
-    except subprocess.CalledProcessError as e:
-        print(f"Error during git operation: {e}")
-        return False
-    except Exception as e:
-        print(f"Unexpected error: {e}")
-        return False
+    max_retries = 3
+    retry_count = 0
+    
+    while retry_count < max_retries:
+        try:
+            if not os.path.exists(REPO_DIR):
+                print(f"Cloning repository (attempt {retry_count + 1}/{max_retries}): {GIT_URL}")
+                # Use shallow clone with depth=1 and single branch
+                subprocess.run([
+                    "git", "clone",
+                    "--depth", "1",
+                    "--single-branch",
+                    "--branch", "main",
+                    GIT_URL,
+                    REPO_DIR
+                ], check=True, timeout=60)
+                print("Repository cloned successfully")
+            else:
+                print("Repository exists. Pulling latest changes...")
+                # Fetch and reset instead of pull
+                subprocess.run(["git", "fetch", "--depth=1"], cwd=REPO_DIR, check=True, timeout=30)
+                subprocess.run(["git", "reset", "--hard", "origin/main"], cwd=REPO_DIR, check=True, timeout=30)
+                print("Repository updated successfully")
+            return True
+        except subprocess.TimeoutExpired:
+            print(f"Timeout during git operation (attempt {retry_count + 1}/{max_retries})")
+            retry_count += 1
+        except subprocess.CalledProcessError as e:
+            print(f"Error during git operation (attempt {retry_count + 1}/{max_retries}): {e}")
+            retry_count += 1
+            # Clean up failed clone
+            if os.path.exists(REPO_DIR):
+                shutil.rmtree(REPO_DIR)
+        except Exception as e:
+            print(f"Unexpected error (attempt {retry_count + 1}/{max_retries}): {e}")
+            retry_count += 1
+        
+        if retry_count < max_retries:
+            print("Waiting 5 seconds before retrying...")
+            time.sleep(5)
+    
+    print("Failed to clone/update repository after all retries")
+    return False
 
 
 def process_notebook_file(file_path: str) -> dict:

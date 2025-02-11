@@ -7,7 +7,7 @@ from typing import Dict, List, Set
 
 # Paths
 RAW_DOCS_DIR = "data/raw_docs/extracted"
-OUTPUT_DIR = "data/external_docs"
+OUTPUT_DIR = "data/external_docs/documents"
 
 
 def load_json_file(filepath: str) -> List[Dict]:

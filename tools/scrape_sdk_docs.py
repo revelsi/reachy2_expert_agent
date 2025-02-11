@@ -19,19 +19,15 @@ GIT_URL = "https://github.com/pollen-robotics/reachy2-sdk.git"
 # Output directories
 RAW_DOCS_DIR = "data/raw_docs"
 EXTRACTED_DIR = os.path.join(RAW_DOCS_DIR, "extracted")
-EXTERNAL_DOCS_DIR = "data/external_docs"
+EXTERNAL_DOCS_DIR = "data/external_docs/documents"
 os.makedirs(EXTRACTED_DIR, exist_ok=True)
 os.makedirs(EXTERNAL_DOCS_DIR, exist_ok=True)
 
 # Repository directories
 REPO_DIR = os.path.join(RAW_DOCS_DIR, "reachy2_sdk_repo")
 SDK_SOURCE_DIR = os.path.join(REPO_DIR, "src", "reachy2_sdk")
-EXAMPLES_SOURCE_DIR = os.path.join(
-    REPO_DIR, "src", "examples"
-)  # Examples are in src/examples
-TUTORIALS_SOURCE_DIR = os.path.join(
-    RAW_DOCS_DIR, "reachy2_tutorials"
-)  # Tutorials from separate repo
+EXAMPLES_SOURCE_DIR = os.path.join(REPO_DIR, "src", "examples")
+TUTORIALS_SOURCE_DIR = os.path.join(RAW_DOCS_DIR, "reachy2_tutorials")
 
 # Legacy directories (kept for compatibility)
 API_DOCS_DIR = os.path.join(RAW_DOCS_DIR, "api_docs")

@@ -106,6 +106,9 @@ graph TD
 
 ### 7. Document Processing Layer
 - **Doc Scrapers**: Multi-source documentation collection
+  - Automatic retries for network issues
+  - Shallow cloning for efficiency
+  - Timeout handling and cleanup
 - **Doc Chunker**: Semantic document segmentation
 - **Embedding Pipeline**: Vector generation and storage
 

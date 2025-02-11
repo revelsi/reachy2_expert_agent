@@ -118,13 +118,13 @@ def main():
 
         # Define collection processing order (most important first)
         collections = [
-            "data/external_docs/api_docs_functions.json",  # API functions (primary reference)
-            "data/external_docs/api_docs_classes.json",  # API classes
-            "data/external_docs/api_docs_modules.json",  # Module documentation
-            "data/external_docs/reachy2_sdk.json",  # SDK implementation
-            "data/external_docs/reachy2_docs.json",  # Reachy 2 official documentation
-            "data/external_docs/reachy2_tutorials.json",  # Usage examples
-            "data/external_docs/vision_examples.json",  # Vision examples
+            "data/external_docs/documents/api_docs_functions.json",  # API functions (primary reference)
+            "data/external_docs/documents/api_docs_classes.json",  # API classes
+            "data/external_docs/documents/api_docs_modules.json",  # Module documentation
+            "data/external_docs/documents/reachy2_sdk.json",  # SDK implementation
+            "data/external_docs/documents/reachy2_docs.json",  # Reachy 2 official documentation
+            "data/external_docs/documents/reachy2_tutorials.json",  # Usage examples
+            "data/external_docs/documents/vision_examples.json",  # Vision examples
         ]
 
         # Track processing status

@@ -107,11 +107,11 @@ def analyze_chunks(filepath: str, collection_name: str):
 
 def main():
     collections = {
-        "API Classes": "external_docs/documents/api_docs_classes.json",
-        "API Functions": "external_docs/documents/api_docs_functions.json",
-        "SDK Documentation": "external_docs/documents/reachy2_sdk.json",
-        "Vision Examples": "external_docs/documents/vision_examples.json",
-        "Tutorials": "external_docs/documents/reachy2_tutorials.json",
+        "API Classes": "data/external_docs/documents/api_docs_classes.json",
+        "API Functions": "data/external_docs/documents/api_docs_functions.json",
+        "SDK Documentation": "data/external_docs/documents/reachy2_sdk.json",
+        "Vision Examples": "data/external_docs/documents/vision_examples.json",
+        "Tutorials": "data/external_docs/documents/reachy2_tutorials.json",
     }
 
     for name, filepath in collections.items():

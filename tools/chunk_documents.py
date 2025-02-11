@@ -10,8 +10,8 @@ MAX_CHUNK_SIZE = 1500
 OVERLAP_SIZE = 300
 
 # Input/Output paths
-RAW_DOCS_DIR = "raw_docs/extracted"
-OUTPUT_DIR = "external_docs/documents"
+RAW_DOCS_DIR = "data/raw_docs/extracted"
+OUTPUT_DIR = "data/external_docs/documents"
 
 def load_json_file(filepath: str) -> List[Dict]:
     """Load a JSON file containing raw documents."""

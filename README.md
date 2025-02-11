@@ -87,6 +87,14 @@ reachy2_expert_agent/
    ```
 
    > **Note**: While `make refresh-full` is available to include Reachy2 docs, it's recommended to use `make refresh` as it provides all the necessary documentation for the agent to function properly. The full refresh option is still experimental and may include incomplete documentation.
+   >
+   > If you encounter network issues during the refresh process, the system will automatically retry failed operations. You can also run individual scraping commands separately:
+   > ```bash
+   > make clean        # Clean existing data
+   > make scrape      # Scrape documentation
+   > make chunk       # Process documents
+   > make update-db   # Update vector database
+   > ```
 
 ## Development
 
