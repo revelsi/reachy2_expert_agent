@@ -7,6 +7,8 @@ graph TD
         CH --> |History| QP[Query Processor]
         QP --> |Response| CH
         CH --> |Display| UI
+        UI --> |Metadata| TH[Thinking Handler]
+        TH --> |Progress| UI
     end
 
     subgraph "Chat Management"
@@ -28,6 +30,13 @@ graph TD
         RR --> |Ranked Docs| RG[Response Generator]
     end
 
+    subgraph "Progress Tracking"
+        TH --> |Status| PM[Progress Manager]
+        PM --> |Updates| TH
+        PM --> |Timing| TH
+        PM --> |Logs| TH
+    end
+
     subgraph "Safety Layer"
         RG --> |Draft| SC[Safety Checker]
         SC --> |Validate| SG[Safety Guidelines]
@@ -47,6 +56,7 @@ graph TD
         VS --> |Contains| C4[reachy2_sdk]
         VS --> |Contains| C5[vision_examples]
         VS --> |Contains| C6[reachy2_tutorials]
+        VS --> |Contains| C7[reachy2_docs]
     end
 
     subgraph "Models"
@@ -60,10 +70,11 @@ graph TD
 ## Component Details
 
 ### 1. User Interface Layer
-- **Gradio Interface**: Web-based chat interface
+- **Gradio Interface**: Web-based chat interface with message UI
 - **Chat Handler**: Manages conversation flow and history
 - **Query Processor**: Coordinates query processing pipeline
-- **Progress Tracking**: Real-time status updates
+- **Thinking Handler**: Manages real-time progress updates
+- **Progress Tracking**: Real-time status and timing updates
 
 ### 2. Chat Management Layer
 - **History Manager**: Maintains conversation context
@@ -81,26 +92,33 @@ graph TD
 - **Re-Ranker**: Cross-encoder based re-ranking
 - **Response Generator**: Context-aware response synthesis
 
-### 5. Safety Layer
+### 5. Progress Tracking Layer
+- **Progress Manager**: Real-time status updates
+- **Timing Information**: Duration tracking for each step
+- **Log Management**: Detailed operation logging
+- **Status Updates**: Live progress indicators
+
+### 6. Safety Layer
 - **Safety Checker**: Validates responses against guidelines
 - **Safety Guidelines**: Category-specific safety rules
 - **Validation Rules**: Movement, gripper, vision safety
 - **Context Tracking**: Maintains safety context across chat
 
-### 6. Document Processing Layer
+### 7. Document Processing Layer
 - **Doc Scrapers**: Multi-source documentation collection
 - **Doc Chunker**: Semantic document segmentation
 - **Embedding Pipeline**: Vector generation and storage
 
-### 7. Collections Layer
+### 8. Collections Layer
 - **api_docs_functions**: Function documentation
 - **api_docs_classes**: Class documentation
 - **api_docs_modules**: Module documentation
 - **reachy2_sdk**: SDK examples
 - **vision_examples**: Vision system examples
 - **reachy2_tutorials**: Tutorial content
+- **reachy2_docs**: Official Reachy2 documentation
 
-### 8. Model Layer
+### 9. Model Layer
 - **Mistral-Small**: Query decomposition
 - **Instructor Models**: Document embeddings
 -   - InstructorXL (default): Highest quality, slower (768d)
@@ -108,6 +126,29 @@ graph TD
 -   - InstructorBase: Fastest, may sacrifice some quality (768d)
 - **Cross-Encoder**: Result re-ranking
 - **Mistral-Large**: Response generation
+
+## Message Format
+
+```json
+{
+    "role": "assistant",
+    "content": "Message content",
+    "metadata": {
+        "title": "Step Title",
+        "status": "pending/done",
+        "log": "Detailed progress information",
+        "duration": 0.0
+    }
+}
+```
+
+## Progress Tracking
+
+Each operation includes:
+1. Status indicators (pending/done)
+2. Timing information (duration in seconds)
+3. Detailed logs of sub-steps
+4. Progress updates in real-time
 
 ## Data Flow
 
@@ -122,11 +163,11 @@ graph TD
    - Query type detector determines category
    - Collection weights are assigned
 
-3. **Context Management**
-   - Previous queries and responses tracked
-   - Code examples maintained for reference
-   - Safety guidelines accumulated
-   - Conversation flow preserved
+3. **Progress Updates**
+   - Real-time status updates for each step
+   - Duration tracking for operations
+   - Detailed logging of sub-tasks
+   - Live progress indicators
 
 4. **Document Retrieval**
    - Vector store searches across collections

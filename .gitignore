@@ -111,6 +111,12 @@ Thumbs.db
 # Unwanted large binary files
 libtorch_cpu.dylib
 
+# Gradio specific
+gradio_cached_examples/
+flagged/
+*.db
+gradio_queue.db
+
 # Your unwanted environment folders (adjust names if needed)
 newenv/
 new_env/ 

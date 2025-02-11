@@ -1,15 +1,15 @@
 # Core dependencies
-gradio>=4.0.0
+gradio>=4.16.0
 requests>=2.31.0
 python-dotenv>=1.0.0
 tqdm>=4.65.0
 
 # Machine Learning & NLP
-torch>=2.6.0
-transformers==4.36.0
+torch>=2.2.0
+transformers>=4.36.0
 sentence-transformers>=2.2.2
 chromadb>=0.4.22
-InstructorEmbedding==1.0.0
+InstructorEmbedding>=1.0.0
 
 # Document Processing
 beautifulsoup4>=4.12.2

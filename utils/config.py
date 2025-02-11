@@ -43,77 +43,31 @@ class RAGConfig:
     # Collection weights for different query types
     COLLECTION_WEIGHTS = {
         "code": {
-            "api_docs_functions": 1.0,    # Function signatures and usage (primary source)
-            "api_docs_classes": 0.9,      # Class structure and methods
-            "api_docs_modules": 0.7,      # Module-level context
-            "reachy2_sdk": 0.9,          # Implementation details
-            "vision_examples": 0.8,       # Vision-specific examples
-            "reachy2_tutorials": 0.8      # Complete working examples
-        },
-        "concept": {
-            "api_docs_modules": 1.0,      # High-level architecture (primary source)
-            "api_docs_classes": 0.9,      # Class structure and design
-            "reachy2_tutorials": 0.9,     # High-level explanations
-            "reachy2_sdk": 0.8,          # Implementation context
-            "vision_examples": 0.8,       # Vision concepts
-            "api_docs_functions": 0.7     # Specific details
-        },
-        "error": {
-            "api_docs_classes": 1.0,      # Error class definitions (primary source)
-            "api_docs_functions": 0.9,    # Error-related methods
-            "api_docs_modules": 0.8,      # Module-level error handling
-            "reachy2_sdk": 0.8,          # Error handling examples
-            "vision_examples": 0.8,       # Vision-specific errors
-            "reachy2_tutorials": 0.7      # Error scenarios
-        },
-        "setup": {
-            "api_docs_modules": 1.0,      # Module setup (primary source)
-            "api_docs_classes": 0.9,      # Component initialization
-            "reachy2_sdk": 0.9,          # Configuration details
-            "vision_examples": 0.9,       # Vision setup
-            "api_docs_functions": 0.8,    # Setup methods
-            "reachy2_tutorials": 0.8      # Setup guides
-        },
-        "vision": {
-            "vision_examples": 1.0,       # Vision examples (primary source)
-            "api_docs_modules": 0.9,      # Vision module documentation
-            "api_docs_classes": 0.9,      # Vision classes
-            "api_docs_functions": 0.8,    # Vision functions
-            "reachy2_tutorials": 0.8,     # Vision tutorials
-            "reachy2_sdk": 0.7           # General SDK context
+            "api_docs_functions": 1.0,    # Primary source for function implementations
+            "api_docs_classes": 0.95,     # Core class documentation
+            "reachy2_sdk": 0.9,          # Complete working examples
+            "reachy2_tutorials": 0.85,    # Tutorial code examples
+            "vision_examples": 0.8,       # Vision-specific code
+            "api_docs_modules": 0.7       # Module context
         },
         "default": {
-            "api_docs_functions": 1.0,    # API reference is the primary source
-            "api_docs_classes": 0.9,      # Class documentation
-            "api_docs_modules": 0.9,      # Module documentation
-            "reachy2_sdk": 0.8,          # SDK implementation
-            "vision_examples": 0.8,       # Vision examples
-            "reachy2_tutorials": 0.8      # Usage examples
+            "api_docs_functions": 1.0,    # Default to prioritizing code
+            "api_docs_classes": 0.95,
+            "reachy2_sdk": 0.9,
+            "reachy2_tutorials": 0.85,
+            "vision_examples": 0.8,
+            "api_docs_modules": 0.7
         }
     }
     
-    # Query type detection keywords
+    # Simplified query types focused on code
     QUERY_KEYWORDS = {
         "code": [
             "how to", "example", "implement", "code", "function",
-            "method", "call", "use", "write", "program"
+            "method", "call", "use", "write", "program", "script",
+            "create", "make", "control", "move", "set", "get"
         ],
-        "concept": [
-            "what is", "explain", "understand", "concept", "architecture",
-            "design", "overview", "describe", "definition", "mean"
-        ],
-        "error": [
-            "error", "exception", "fail", "issue", "bug", "problem",
-            "wrong", "fix", "debug", "handle", "catch"
-        ],
-        "setup": [
-            "setup", "install", "configure", "initialization", "start",
-            "calibrate", "prepare", "connect", "setting", "configuration"
-        ],
-        "vision": [
-            "camera", "vision", "image", "video", "detect", "recognize",
-            "see", "view", "capture", "stream", "visual"
-        ]
+        "default": []  # All other queries default to code-focused weights
     }
 
 class Config:

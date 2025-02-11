@@ -2,9 +2,30 @@
 
 ## Project Description
 
-The Reachy2 Expert Agent is an AI-powered documentation assistant designed to help users effectively work with the Reachy2 robot platform. It processes and indexes documentation from multiple sources to provide accurate and contextual responses to user queries about the Reachy2 SDK, Vision Module, and tutorials.
+The Reachy2 Expert Agent is an AI-powered documentation assistant designed to help users effectively work with the Reachy2 robot platform. It processes and indexes documentation from multiple sources to provide accurate and contextual responses to user queries about the Reachy2 SDK, Vision Module, and tutorials. The system features a modern, real-time UI that shows the reasoning process and progress of query handling.
 
 ## Architecture
+
+### User Interface
+1. **Chat Interface**
+   - Modern Gradio-based web interface
+   - Real-time message updates
+   - Progress tracking for each operation
+   - Collapsible reasoning steps
+   - Code syntax highlighting
+   - Copy-to-clipboard functionality
+   
+2. **Progress Tracking**
+   - Live status updates
+   - Operation timing information
+   - Detailed progress logs
+   - Step-by-step reasoning display
+
+3. **Context Management**
+   - Conversation history tracking
+   - Code example memory
+   - Safety guideline persistence
+   - Query context preservation
 
 ### Documentation Sources
 1. **Reachy2 SDK Documentation**
@@ -47,6 +68,7 @@ The Reachy2 Expert Agent is an AI-powered documentation assistant designed to he
      - `reachy2_sdk`: SDK examples and implementation patterns
      - `vision_examples`: Vision-specific examples and guides
      - `reachy2_tutorials`: Interactive tutorials and guides
+     - `reachy2_docs`: Official Reachy2 documentation
 
 ### Collection Structure
 
@@ -88,22 +110,31 @@ The Reachy2 Expert Agent is an AI-powered documentation assistant designed to he
    - Practical use cases
    - Code with explanations
 
+7. **reachy2_docs**
+   - Official Reachy2 documentation
+   - Installation guides
+   - Configuration instructions
+   - Hardware specifications
+
 ### Query Processing
 
 1. **User Input Processing**
    - Natural language query understanding
    - Context extraction and maintenance
    - Query type classification
+   - Real-time progress updates
 
 2. **Document Retrieval**
    - Semantic search across relevant collections
    - Context-aware document ranking
    - Multi-collection query support
+   - Progress tracking for each collection
 
 3. **Response Generation**
    - Context-aware response synthesis
    - Code example integration
    - Source attribution and references
+   - Safety guideline incorporation
 
 ## Current Status
 
@@ -112,13 +143,16 @@ The Reachy2 Expert Agent is an AI-powered documentation assistant designed to he
 - Comprehensive API documentation extraction
 - Example and tutorial integration
 - Vector database implementation
-- Basic query processing and response generation
+- Real-time progress tracking UI
+- Step-by-step reasoning display
+- Modern message-based interface
 
 ### In Progress
 - Enhanced context management
 - Improved code example integration
 - Advanced query understanding
 - Response quality metrics
+- UI/UX refinements
 
 ### Future Enhancements
 - Real-time documentation updates
@@ -126,6 +160,7 @@ The Reachy2 Expert Agent is an AI-powered documentation assistant designed to he
 - User feedback integration
 - Custom tutorial generation
 - Multi-language support
+- Enhanced progress visualization
 
 ## Development Guidelines
 
@@ -140,6 +175,13 @@ The Reachy2 Expert Agent is an AI-powered documentation assistant designed to he
 - Maintain comprehensive test coverage
 - Document all major functions and classes
 - Regular code reviews and updates
+
+### UI Development
+- Focus on user experience
+- Maintain responsive design
+- Ensure clear progress indication
+- Implement proper error handling
+- Support accessibility features
 
 ### Version Control
 - Feature branches for new development
@@ -162,6 +204,7 @@ The Reachy2 Expert Agent is an AI-powered documentation assistant designed to he
 - Query response times
 - Error rates and types
 - User feedback and satisfaction metrics
+- UI performance metrics
 
 ## Contributing
 
@@ -170,6 +213,7 @@ See `CONTRIBUTING.md` for detailed guidelines on:
 - Pull request process
 - Testing requirements
 - Documentation updates
+- UI/UX guidelines
 
 ## License
 

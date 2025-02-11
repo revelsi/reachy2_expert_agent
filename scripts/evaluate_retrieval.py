@@ -15,21 +15,39 @@ TEST_QUERIES = {
         "api_docs_classes": ["Arm", "ArmController", "goto", "translate_by", "rotate_by"],
         "api_docs_functions": ["turn_on", "goto", "rotate_by", "translate_by", "set_goal_positions"],
         "reachy2_sdk": ["Move Reachy's right arm", "goto_posture", "rotate_by"],
-        "reachy2_tutorials": ["Arm movement", "goto", "translate_by", "rotate_by"]
+        "reachy2_tutorials": ["Arm movement", "goto", "translate_by", "rotate_by"],
+        "reachy2_docs": ["arm_movement", "arm_control", "motion_control"]
     },
     "What is the camera API?": {
         "api_docs_modules": ["camera", "camera_manager", "media"],
         "api_docs_classes": ["CameraManager", "CameraView", "get_image"],
         "api_docs_functions": ["get_image", "get_intrinsics", "get_camera_info"],
         "vision_examples": ["camera_wrapper", "SDKWrapper", "get_image"],
-        "reachy2_tutorials": ["camera_usage", "get_image", "camera_setup"]
+        "reachy2_tutorials": ["camera_usage", "get_image", "camera_setup"],
+        "reachy2_docs": ["camera_system", "vision_capabilities", "camera_setup"]
+    },
+    "How to install Reachy2?": {
+        "reachy2_docs": ["installation", "setup", "requirements", "getting_started"],
+        "api_docs_modules": ["installation", "setup"],
+        "reachy2_tutorials": ["installation_guide", "setup_tutorial"],
+        "reachy2_sdk": ["installation", "setup"],
+        "api_docs_classes": ["Robot", "ConnectionManager"],
+        "api_docs_functions": ["connect", "initialize"]
+    },
+    "What are Reachy2's hardware specifications?": {
+        "reachy2_docs": ["specifications", "hardware", "technical_details", "dimensions"],
+        "api_docs_modules": ["hardware", "specifications"],
+        "reachy2_sdk": ["hardware_info", "specifications"],
+        "api_docs_classes": ["Robot", "Arm", "MobileBase"],
+        "api_docs_functions": ["get_hardware_info", "get_specifications"]
     },
     "How to control the gripper?": {
         "api_docs_modules": ["hand", "gripper"],
         "api_docs_classes": ["Gripper", "GripperController", "open", "close"],
         "api_docs_functions": ["open", "close", "set_opening", "get_opening"],
         "reachy2_sdk": ["Gripper Control", "open", "close", "set_opening"],
-        "reachy2_tutorials": ["gripper.open", "gripper.close", "gripper_control"]
+        "reachy2_tutorials": ["gripper.open", "gripper.close", "gripper_control"],
+        "reachy2_docs": ["gripper_control", "end_effector", "gripper_specs"]
     },
     "How to get joint positions?": {
         "api_docs_modules": ["joints_based_part", "part"],

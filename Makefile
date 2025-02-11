@@ -4,7 +4,8 @@
 help:
 	@echo "Available commands:"
 	@echo "  make clean      - Remove all generated files"
-	@echo "  make scrape     - Scrape documentation from all sources"
+	@echo "  make scrape     - Scrape documentation (excluding reachy2_docs)"
+	@echo "  make scrape-full- Scrape all documentation including reachy2_docs"
 	@echo "  make chunk      - Process documents into chunks"
 	@echo "  make update-db  - Update vector database with chunked documents"
 	@echo "  make refresh    - Clean, scrape, chunk, and update database"
@@ -18,13 +19,20 @@ clean:
 	rm -rf vectorstore/*
 	@echo "Cleaned generated files"
 
-# Scrape documentation
+# Scrape documentation (excluding reachy2_docs)
 scrape:
 	python scripts/scrape_sdk_docs.py
 	python scripts/scrape_vision_docs.py
 	python scripts/scrape_tutorials.py
+	@echo "Documentation scraping complete (reachy2_docs excluded)"
+
+# Optional full scrape including reachy2_docs (if needed)
+scrape-full:
+	python scripts/scrape_sdk_docs.py
+	python scripts/scrape_vision_docs.py
+	python scripts/scrape_tutorials.py
 	python scripts/scrape_reachy2_docs.py
-	@echo "Documentation scraping complete"
+	@echo "Full documentation scraping complete"
 
 # Process documents into chunks
 chunk:
@@ -36,9 +44,13 @@ update-db:
 	python scripts/update_vectordb.py
 	@echo "Vector database update complete"
 
-# Clean and rebuild everything
+# Clean and rebuild everything (excluding reachy2_docs)
 refresh: clean scrape chunk update-db
-	@echo "Refresh complete"
+	@echo "Refresh complete (reachy2_docs excluded)"
+
+# Full refresh including reachy2_docs
+refresh-full: clean scrape-full chunk update-db
+	@echo "Full refresh complete"
 
 # Run tests
 test:

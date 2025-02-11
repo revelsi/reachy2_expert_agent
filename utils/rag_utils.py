@@ -16,6 +16,10 @@ import time
 logging.getLogger('chromadb').setLevel(logging.ERROR)
 logging.getLogger('chromadb.telemetry').setLevel(logging.ERROR)
 
+# Configure logging for reasoning steps
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("reachy2_agent")
+
 def detect_query_type(query: str) -> str:
     """Detect the type of query based on keywords."""
     query = query.lower()
@@ -37,30 +41,62 @@ class QueryDecomposer:
         self.temperature = config.model_config.QUERY_MODEL_TEMP
         self.max_tokens = config.model_config.QUERY_MAX_TOKENS
         print(f"Using {self.model} for query decomposition")
+        self.debug = config.debug
     
     def decompose_query(self, query: str) -> List[str]:
         """Break down a complex query into simpler sub-queries."""
         try:
+            if self.debug:
+                logger.info("🤔 Decomposing query: %s", query)
+            
             messages = [
                 {
                     "role": "system",
-                    "content": "You are a robotics expert assistant specializing in the Reachy robot platform. Your task is to break down complex queries into 3-5 essential, actionable sub-tasks."
+                    "content": """You are a robotics expert assistant specializing in the Reachy robot platform. Your task is to break down complex queries into essential, actionable sub-tasks.
+
+Response Format:
+```reasoning
+- Source: [one-line reference to relevant documentation]
+- Adapt: [key elements to modify]
+- Verify: [capabilities to check]
+```
+
+[Numbered sub-tasks]
+
+When handling adaptation requests:
+1. First, locate and verify the exact example(s) in documentation
+2. Identify which specific elements need modification
+3. Verify all modifications stay within documented capabilities
+4. Plan implementation using ONLY documented features
+
+Remember:
+- NEVER suggest modifications that aren't supported by documentation
+- ALWAYS base adaptations on specific examples
+- If no suitable example exists, explicitly state this"""
                 },
                 {
                     "role": "user",
-                    "content": f"""Break down this robotics query into 3-5 essential sub-tasks, focusing on the most important actions needed.
+                    "content": f"""Break down this robotics query into essential sub-tasks, focusing on adaptation from existing examples.
 
 Key aspects to consider:
 - Core functionality (what's the main goal?)
 - Required setup or initialization
 - Key parameters or configurations
 - Safety requirements
+- Specific documented examples to adapt from
+- Required modifications to existing examples
+- Safety checks to preserve
 
 Query: {query}
 
-Provide ONLY the 3-5 most important sub-tasks, numbered 1-5. Each sub-task should be clear and actionable."""
+Start with the reasoning block, then provide 3-5 clear, actionable sub-tasks based on documented capabilities.
+
+IMPORTANT: Prefix each step of your reasoning with [REASON] so it can be logged."""
                 }
             ]
+            
+            if self.debug:
+                logger.info("📤 Sending query to model...")
             
             payload = {
                 "model": self.model,
@@ -77,10 +113,31 @@ Provide ONLY the 3-5 most important sub-tasks, numbered 1-5. Each sub-task shoul
             }
 
             response = requests.post(self.endpoint, json=payload, headers=headers)
-            response.raise_for_status()  # Raise an error for bad status codes
+            response.raise_for_status()
             response_json = response.json()
             
-            # Handle different possible response formats
+            # Extract and log reasoning steps
+            if self.debug:
+                content = response_json["choices"][0]["message"]["content"]
+                for line in content.split("\n"):
+                    if line.startswith("[REASON]"):
+                        logger.info("🔍 %s", line.replace("[REASON] ", ""))
+            
+            return self._parse_response(response_json)
+            
+        except requests.exceptions.RequestException as e:
+            print(f"Error making request to Mistral API: {str(e)}")
+            raise
+        except (KeyError, ValueError) as e:
+            print(f"Error processing Mistral API response: {str(e)}")
+            raise
+        except Exception as e:
+            print(f"Unexpected error during query decomposition: {str(e)}")
+            raise
+
+    def _parse_response(self, response_json: dict) -> List[str]:
+        """Parse the model response into sub-queries."""
+        try:
             if "choices" in response_json and response_json["choices"]:
                 if "message" in response_json["choices"][0]:
                     content = response_json["choices"][0]["message"]["content"].strip()
@@ -92,25 +149,26 @@ Provide ONLY the 3-5 most important sub-tasks, numbered 1-5. Each sub-task shoul
                 raise ValueError(f"No choices found in Mistral API response: {response_json}")
             
             # Parse the response into sub-queries
-            sub_queries = [
-                line.strip().split('. ', 1)[1] if '. ' in line else line.strip()
-                for line in content.split("\n")
-                if line.strip() and not line.strip().isspace()
-            ]
+            sub_queries = []
+            for line in content.split("\n"):
+                line = line.strip()
+                if line and not line.startswith("[REASON]") and not line.startswith("```"):
+                    if '. ' in line:
+                        sub_queries.append(line.split('. ', 1)[1])
+                    else:
+                        sub_queries.append(line)
             
             if not sub_queries:
                 raise ValueError("No valid sub-queries found in the response")
             
+            if self.debug:
+                logger.info("📋 Parsed %d sub-queries", len(sub_queries))
+            
             return sub_queries
             
-        except requests.exceptions.RequestException as e:
-            print(f"Error making request to Mistral API: {str(e)}")
-            raise
-        except (KeyError, ValueError) as e:
-            print(f"Error processing Mistral API response: {str(e)}")
-            raise
         except Exception as e:
-            print(f"Unexpected error during query decomposition: {str(e)}")
+            if self.debug:
+                logger.error("❌ Error parsing response: %s", str(e))
             raise
 
 class ReRanker:
@@ -140,34 +198,61 @@ class ReRanker:
 class ResponseGenerator:
     """Generates final responses including code snippets."""
     
+    # System prompt template
+    SYSTEM_PROMPT = """You are a code-focused AI assistant for Reachy 2 robot development. Your primary goal is to:
+1. Generate working code examples
+2. Help debug and fix code issues
+3. Provide concise, practical implementation guidance
+4. Adapt and generalize from existing examples ONLY
+
+Response Format:
+```reasoning
+- Base: [one-line reference to example being adapted]
+- Plan: [2-3 key modifications needed]
+- Safety: [critical checks to maintain]
+```
+
+[Rest of the response with code and explanations]
+
+Guidelines:
+- Focus on code solutions over explanations
+- Keep responses brief and code-centric
+- Include necessary imports and setup
+- Ensure code is complete and runnable
+- Follow Python best practices
+- Use type hints when helpful
+
+When responding:
+1. Start with the lightweight reasoning block
+2. Present the code solution with clear comments on what was modified
+3. Note any requirements or dependencies
+4. Highlight key parameters that were adjusted
+
+Adaptation Rules:
+1. NEVER create examples from scratch - always adapt from documented examples
+2. ALWAYS cite the specific example being adapted
+3. ONLY modify parameters, logic, or control flow that exists in the original
+4. If no suitable example exists in the documentation, explicitly state this
+5. Preserve all safety checks and error handling from the original
+
+For debugging:
+1. Focus on specific error messages
+2. Provide minimal working examples
+3. Suggest practical fixes
+
+Security:
+- Never expose API keys or credentials
+- Use environment variables for sensitive data
+- Follow secure coding practices"""
+
+    # Query type instructions simplified for code focus
     QUERY_TYPE_INSTRUCTIONS = {
-        "code": "Generate a response that includes relevant code examples and implementation details.",
-        "concept": "Explain the concept clearly with relevant technical details and architecture.",
-        "error": "Provide error handling guidance and troubleshooting steps.",
-        "setup": "Give step-by-step setup or configuration instructions.",
-        "vision": "Explain vision-related functionality with camera setup details.",
-        "default": "Provide a clear and detailed response with relevant examples."
+        "code": "Generate a response with complete, runnable code examples.",
+        "default": "Provide a code-focused response with implementation details."
     }
 
     # Maximum number of previous messages to include for context
-    MAX_HISTORY_MESSAGES = 5
-
-    # System prompt template
-    SYSTEM_PROMPT = """You are a robotics expert assistant specializing in the Reachy robot platform. Your responses must be strictly related to robotics and the Reachy platform. If a query is not related to robotics or the Reachy robot, respond with: 'I'm sorry, I can only answer questions related to robotics and the Reachy platform.'
-
-When providing code examples:
-1. Always include ALL necessary import statements (e.g., 'import reachy2', 'import pollen_vision')
-2. Include proper error handling
-3. Follow safety guidelines
-4. Add comments explaining critical steps
-
-When handling follow-up questions:
-1. Reference previous context when relevant
-2. Maintain consistency with previous code examples
-3. Build upon previously shared safety guidelines
-4. Clarify any assumptions from previous interactions
-
-Your task is to generate detailed, accurate responses based on the provided documentation."""
+    MAX_HISTORY_MESSAGES = 3  # Reduced from 5 to keep context more focused
 
     # Safety-related constants
     SAFETY_KEYWORDS = [
@@ -176,30 +261,29 @@ Your task is to generate detailed, accurate responses based on the provided docu
     ]
 
     SAFETY_GUIDELINES = {
-        "movement": """⚠️ Safety Note for Movement:
-- Always ensure sufficient clearance around the robot
-- Start with slow speeds and gradually increase as needed
-- Monitor the robot's surroundings during operation
-- Be prepared to use the emergency stop if needed""",
+        "movement": """⚠️ Movement Safety:
+- Set safe speed limits
+- Monitor surroundings
+- Use emergency stop
+- Test in simulation first""",
 
-        "gripper": """⚠️ Safety Note for Gripper Operation:
-- Ensure proper object placement before grasping
-- Monitor gripping force to prevent damage
-- Keep hands clear of the gripper during operation
-- Test gripping operations without objects first""",
+        "gripper": """⚠️ Gripper Safety:
+- Set force limits
+- Monitor grip state
+- Keep clear during operation
+- Test without objects first""",
 
-        "vision": """⚠️ Safety Note for Vision Operations:
-- Ensure proper lighting conditions
-- Verify camera calibration before operations
-- Maintain clear line of sight
-- Regular validation of object detection""",
+        "vision": """⚠️ Vision Safety:
+- Verify camera calibration
+- Validate object detection
+- Maintain clear view
+- Handle detection failures""",
 
-        "general": """⚠️ General Safety Guidelines:
-- Import all necessary packages including safety modules
-- Initialize the robot in a safe starting position
-- Implement proper error handling
-- Follow the robot's workspace limitations
-- Maintain emergency stop access"""
+        "general": """⚠️ Code Safety:
+- Import safety modules
+- Use safe starting positions
+- Handle errors properly
+- Follow workspace limits"""
     }
 
     def __init__(self):
@@ -210,6 +294,7 @@ Your task is to generate detailed, accurate responses based on the provided docu
         self.temperature = config.model_config.CODE_MODEL_TEMP
         self.max_tokens = config.model_config.CODE_MAX_TOKENS
         self.conversation_history = []
+        self.debug = config.debug
 
     def _format_message_for_history(self, role: str, content: str) -> dict:
         """Format a message for the conversation history."""
@@ -265,17 +350,25 @@ Your task is to generate detailed, accurate responses based on the provided docu
     def generate_response(self, query: str, context: List[str], query_type: str = "default") -> str:
         """Generate a response based on the query, context, and conversation history."""
         try:
+            if self.debug:
+                logger.info("💭 Generating response for: %s", query)
+                logger.info("📚 Using %d context documents", len(context))
+            
             # Get type-specific instructions
             type_instructions = self.QUERY_TYPE_INSTRUCTIONS.get(query_type, self.QUERY_TYPE_INSTRUCTIONS["default"])
             
             # Format context
             formatted_context = "\n\n".join(f"Document {i+1}:\n{doc}" for i, doc in enumerate(context))
             
-            # Prepare messages with conversation history
-            messages = [{"role": "system", "content": f"{self.SYSTEM_PROMPT}\n{type_instructions}"}]
+            messages = [
+                {"role": "system", "content": f"{self.SYSTEM_PROMPT}\n{type_instructions}\n\nIMPORTANT: Prefix each step of your reasoning with [REASON] so it can be logged."}
+            ]
             
             # Add relevant conversation history
             history = self._get_relevant_history()
+            if history and self.debug:
+                logger.info("📜 Using %d historical messages for context", len(history))
+            
             if history:
                 messages.extend([
                     {"role": msg["role"], "content": msg["content"]}
@@ -288,7 +381,9 @@ Your task is to generate detailed, accurate responses based on the provided docu
                 "content": f"""Query: {query}\n\nRelevant Documentation:\n{formatted_context}\n\nGenerate a detailed response that directly answers the query using the provided documentation and previous conversation context when relevant. Include relevant code examples when appropriate."""
             })
             
-            # Make API call
+            if self.debug:
+                logger.info("📤 Sending request to model...")
+            
             headers = {
                 "Content-Type": "application/json",
                 "Accept": "application/json",
@@ -305,10 +400,15 @@ Your task is to generate detailed, accurate responses based on the provided docu
             response = requests.post(self.endpoint, headers=headers, json=data)
             response.raise_for_status()
             
-            # Extract the response
             result = response.json()
             generated_response = result['choices'][0]['message']['content']
-
+            
+            # Extract and log reasoning steps
+            if self.debug:
+                for line in generated_response.split("\n"):
+                    if line.startswith("[REASON]"):
+                        logger.info("🔍 %s", line.replace("[REASON] ", ""))
+            
             # Check and append safety guidelines
             required_guidelines = self._check_safety_requirements(query, generated_response)
             final_response = self._append_safety_guidelines(generated_response, required_guidelines)
@@ -316,13 +416,16 @@ Your task is to generate detailed, accurate responses based on the provided docu
             # Update conversation history
             self._update_history(query, final_response)
             
+            if self.debug:
+                logger.info("✅ Response generation complete")
+            
             return final_response
             
         except Exception as e:
             error_msg = f"I apologize, but I encountered an error while generating the response: {str(e)}"
-            # Still update history even with error
+            if self.debug:
+                logger.error("❌ Error generating response: %s", str(e))
             self._update_history(query, error_msg)
-            print(f"Error generating response: {str(e)}")
             return error_msg
 
 class RAGPipeline:
