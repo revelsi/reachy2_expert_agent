@@ -65,8 +65,21 @@ reachy2_expert_agent/
 4. Set up environment variables:
    ```bash
    cp .env.example .env
-   # Edit .env with your API keys
    ```
+   
+   Edit `.env` to include your API keys:
+   ```bash
+   # Required API keys
+   MISTRAL_API_KEY=your_mistral_api_key    # Get from https://console.mistral.ai/
+   
+   # Optional settings
+   DEBUG=false                             # Enable for detailed logging
+   ```
+   
+   > **Note**: The Mistral API key is required for the chatbot to function. You can obtain one by:
+   > 1. Creating an account at [console.mistral.ai](https://console.mistral.ai)
+   > 2. Generating an API key in your account settings
+   > 3. Copying the key to your `.env` file
 
 5. Initialize the vector database:
    ```bash
