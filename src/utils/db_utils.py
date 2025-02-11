@@ -209,8 +209,38 @@ Note: These examples demonstrate vision-specific functionality and camera integr
         if instruction:
             texts = [f"{instruction}:\n{text}" for text in texts]
 
-        # Add documents to collection
-        collection.add(documents=texts, metadatas=metadatas, ids=ids)
+        # Process in batches of 100 documents
+        BATCH_SIZE = 100
+        for i in range(0, len(texts), BATCH_SIZE):
+            batch_end = min(i + BATCH_SIZE, len(texts))
+            batch_texts = texts[i:batch_end]
+            batch_metadatas = metadatas[i:batch_end]
+            batch_ids = ids[i:batch_end]
+            
+            print(f"Adding batch {i//BATCH_SIZE + 1} ({len(batch_texts)} documents)...")
+            try:
+                # Add documents to collection
+                collection.add(
+                    documents=batch_texts,
+                    metadatas=batch_metadatas,
+                    ids=batch_ids
+                )
+            except Exception as e:
+                print(f"Error adding batch: {str(e)}")
+                # If batch fails, try with smaller batch size
+                RETRY_BATCH_SIZE = 50
+                for j in range(i, batch_end, RETRY_BATCH_SIZE):
+                    retry_end = min(j + RETRY_BATCH_SIZE, batch_end)
+                    print(f"Retrying with smaller batch {j//RETRY_BATCH_SIZE + 1}...")
+                    try:
+                        collection.add(
+                            documents=texts[j:retry_end],
+                            metadatas=metadatas[j:retry_end],
+                            ids=ids[j:retry_end]
+                        )
+                    except Exception as e:
+                        print(f"Error adding smaller batch: {str(e)}")
+                        raise
 
     def query_collection(
         self,
