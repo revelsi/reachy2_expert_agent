@@ -56,7 +56,7 @@ class RAGConfig:
             "api_docs_classes": 0.95,  # Core class documentation
             "reachy2_sdk": 0.9,  # Complete working examples
             "reachy2_tutorials": 0.85,  # Tutorial code examples
-            "vision_examples": 0.8,  # Vision-specific code
+            "vision_examples": 0.95,  # Vision-specific code (increased weight for vision queries)
             "api_docs_modules": 0.7,  # Module context
         },
         "default": {
@@ -64,7 +64,7 @@ class RAGConfig:
             "api_docs_classes": 0.95,
             "reachy2_sdk": 0.9,
             "reachy2_tutorials": 0.85,
-            "vision_examples": 0.8,
+            "vision_examples": 0.95,
             "api_docs_modules": 0.7,
         },
     }
