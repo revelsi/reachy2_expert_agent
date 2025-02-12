@@ -44,15 +44,22 @@ reachy2_expert_agent/
 
 ## Setup
 
+> **Requirements**: Python 3.10 or higher is required for this project.
+
 1. Create a Python virtual environment:
    ```bash
-   python -m venv venv
+   python3.10 -m venv venv
    source venv/bin/activate  # On Unix/macOS
    # or
    .\venv\Scripts\activate  # On Windows
    ```
 
-2. Install dependencies:
+2. Install the package and its dependencies (recommended):
+   ```bash
+   pip install -e .
+   ```
+   
+   Alternatively, you can install dependencies directly:
    ```bash
    pip install -r requirements.txt
    ```
