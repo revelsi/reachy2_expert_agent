@@ -418,6 +418,13 @@ def main():
                 - Monitor the robot's surroundings
                 - Keep emergency stop accessible
                 - Test in simulation when possible
+                
+                Vision System Safety:
+                - Ensure proper camera calibration
+                - Verify object detection accuracy
+                - Handle detection failures gracefully
+                - Maintain clear camera view
+                - Test vision functions before robot movement
                 """
                 )
 

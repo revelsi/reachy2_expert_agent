@@ -124,9 +124,9 @@ graph TD
 ### 9. Model Layer
 - **Mistral-Small**: Query decomposition
 - **Instructor Models**: Document embeddings
--   - InstructorXL (default): Highest quality, slower (768d)
--   - InstructorLarge: Good balance of speed/quality (768d)
--   - InstructorBase: Fastest, may sacrifice some quality (768d)
+  - InstructorXL (default): Highest quality, slower (768d)
+  - InstructorLarge: Good balance of speed/quality (768d)
+  - InstructorBase: Fastest, may sacrifice some quality (768d)
 - **Cross-Encoder**: Result re-ranking
 - **Mistral-Large**: Response generation
 
@@ -203,7 +203,10 @@ Each operation includes:
 - Sufficient storage for vector database
 - Required API keys
 - Memory for processing large documents
-- Persistent storage for chat history 
+- Persistent storage for chat history
+- Vision dependencies (optional):
+  - pollen-vision (install via `pip install git+https://github.com/pollen-robotics/pollen-vision.git`)
+  - Camera access for vision functionality
 
 ## Project Structure
 

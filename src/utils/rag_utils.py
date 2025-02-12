@@ -234,14 +234,51 @@ Guidelines:
 - Focus on code solutions over explanations
 - Keep responses brief and code-centric
 - Include necessary imports and setup
-- Ensure code is complete and runnable
+- Ensure code is complete, runnable, and fully executable without leaving any functions as placeholders or stubs
 - Follow Python best practices
 - Use type hints when helpful
+
+Vision-Specific Requirements (ONLY for vision-related queries involving camera, object detection, or tracking):
+1. First, remind users to pip install pollen-vision: `pip install git+https://github.com/pollen-robotics/pollen-vision.git`
+2. Include these specific vision imports:
+   ```python
+   from pollen_vision.camera_wrappers.pollen_sdk_camera.pollen_sdk_camera_wrapper import PollenSDKCameraWrapper
+   from pollen_vision.perception import Perception
+   from reachy2_sdk.utils.utils import invert_affine_transformation_matrix
+   ```
+3. Initialize the vision system in this exact sequence:
+   ```python
+   # 1. Initialize camera wrapper with SDK client
+   r_cam = PollenSDKCameraWrapper(reachy)  # reachy is your SDK client
+   
+   # 2. Get camera transformation matrix
+   T_cam_reachy = reachy.cameras.depth.get_extrinsics()
+   T_reachy_cam = invert_affine_transformation_matrix(T_cam_reachy)
+   
+   # 3. Initialize Perception with appropriate parameters
+   perception = Perception(
+       camera=r_cam,
+       T_reachy_cam=T_reachy_cam,
+       freq=40,  # Adjust based on detection needs
+       yolo_thres=0.2  # Adjust based on confidence requirements
+   )
+   
+   # 4. Set up object tracking
+   perception.set_tracked_objects(['object1', 'object2'])  # Replace with actual objects
+   perception.start(visualize=True)  # Set visualize=False in production
+   ```
+
+4. For vision tasks, ALWAYS:
+   - Test object detection labels first
+   - Handle detection failures gracefully
+   - Verify camera calibration
+   - Consider detection confidence thresholds
+   - Monitor frame processing frequency
 
 When responding:
 1. Start with the lightweight reasoning block
 2. Present the code solution with clear comments on what was modified
-3. Note any requirements or dependencies
+3. Note any requirements and dependencies
 4. Highlight key parameters that were adjusted
 
 Adaptation Rules:
@@ -554,63 +591,3 @@ class RAGPipeline:
         except Exception as e:
             print(f"Error processing query: {str(e)}")
             return f"I apologize, but I encountered an error while processing your query: {str(e)}"
-
-
-class VectorStore:
-    """Vector store wrapper for document storage and retrieval."""
-
-    # Collection-specific search instructions for better embeddings
-    COLLECTION_INSTRUCTIONS = {
-        "api_docs_functions": "Represent this function documentation for retrieving relevant Python API methods and functions",
-        "api_docs_classes": "Represent this class documentation for retrieving relevant Python classes and their capabilities",
-        "reachy2_tutorials": "Represent this tutorial content for retrieving relevant robot programming examples and explanations",
-        "reachy2_sdk": "Represent this SDK documentation for retrieving relevant robot control and programming information",
-        "reachy2_docs": "Represent this documentation for retrieving relevant information about Reachy 2's features, capabilities, and usage",
-    }
-
-    def __init__(self, persist_directory: str = "data/vectorstore"):
-        """Initialize the vector store with persistence."""
-        self.persist_directory = persist_directory
-
-        # Create a temporary directory for the database
-        self.temp_dir = tempfile.mkdtemp()
-        print(f"Using temporary directory: {self.temp_dir}")
-
-        # Initialize client with temporary directory and settings to reduce output
-        settings = chromadb.Settings(
-            anonymized_telemetry=False, allow_reset=True, is_persistent=True
-        )
-
-        self.client = chromadb.PersistentClient(path=self.temp_dir, settings=settings)
-
-        # If the persist directory exists, try to copy its contents
-        if os.path.exists(persist_directory):
-            try:
-                shutil.copytree(persist_directory, self.temp_dir, dirs_exist_ok=True)
-                print(f"Copied existing database from {persist_directory}")
-            except Exception as e:
-                print(f"Warning: Could not copy existing database: {e}")
-
-    def query_collection(
-        self,
-        collection_name: str,
-        query_texts: List[str],
-        n_results: int = 5,
-        embedding_function: Callable = None,
-    ) -> Dict:
-        """Query a collection with collection-specific embedding instructions."""
-        collection = self.client.get_collection(
-            name=collection_name, embedding_function=embedding_function
-        )
-
-        # Add collection-specific instruction to query
-        instruction = self.COLLECTION_INSTRUCTIONS.get(collection_name, "")
-        if instruction:
-            query_texts = [f"{instruction}:\n{text}" for text in query_texts]
-
-        # Only include necessary data in the query
-        return collection.query(
-            query_texts=query_texts,
-            n_results=n_results,
-            include=["documents", "distances"],
-        )

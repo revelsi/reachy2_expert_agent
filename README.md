@@ -57,6 +57,13 @@ reachy2_expert_agent/
    pip install -r requirements.txt
    ```
 
+   > **Note**: The initial installation will download the InstructorXL model (~5GB). This may take some time depending on your internet connection and requires sufficient disk space.
+
+   > **Note**: For vision-related functionality (camera, object detection, tracking), you'll need to manually install the pollen-vision package:
+   > ```bash
+   > pip install git+https://github.com/pollen-robotics/pollen-vision.git
+   > ```
+
 3. Install in development mode:
    ```bash
    make install-dev

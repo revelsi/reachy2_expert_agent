@@ -1,13 +1,10 @@
-# Environment variables
+# Environment variables and virtual environments
 .env
-
-# Embedding cache
-.cache/
-sentence_transformers/
-
-# Vector store
-data/vectorstore/*
-!data/vectorstore/.gitkeep
+venv/
+ENV/
+newenv/
+new_env/
+test_venv/
 
 # Python
 __pycache__/
@@ -15,15 +12,11 @@ __pycache__/
 *$py.class
 *.so
 .Python
-venv/
-ENV/
-
-# Distribution / packaging
-dist/
 build/
+dist/
 *.egg-info/
 
-# Unit test / coverage reports
+# Testing and coverage
 htmlcov/
 .tox/
 .nox/
@@ -46,18 +39,26 @@ cover/
 
 # OS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
 Thumbs.db
+ehthumbs.db
 
 # Project specific
 data/raw_docs/*
 !data/raw_docs/.gitkeep
 data/external_docs/*
 !data/external_docs/.gitkeep
+data/vectorstore/*
+!data/vectorstore/.gitkeep
 data/cache/*
 !data/cache/.gitkeep
 
 # Model files and caches
-.pytest_cache/
+.cache/
+sentence_transformers/
 models/
 *.pt
 *.pth
@@ -90,54 +91,16 @@ tmp/
 .temp/
 __temp__/
 
-# Debug files
-debug/
-debug.log
-debug_output/
-
-# System files
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
 # Gradio specific
 gradio_cached_examples/
 flagged/
 *.db
 gradio_queue.db
 
-# Old directories to remove
-chatbot/
-rag_pipeline/
-ui/
-
-# System files
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
 # Unwanted large binary files
 libtorch_cpu.dylib
 
-# Your unwanted environment folders (adjust names if needed)
-newenv/
-new_env/
-
-# New directory structure
-data/vectorstore/*
-!data/vectorstore/.gitkeep
-data/raw_docs/*
-!data/raw_docs/.gitkeep
-data/external_docs/*
-!data/external_docs/.gitkeep
-
-# Logs
-*.log
-logs/
-tmp/ 
+# Old directories to remove
+chatbot/
+rag_pipeline/
+ui/ 
