@@ -9,7 +9,7 @@ setup(
         for line in open("requirements.txt")
         if line.strip() and not line.startswith("#")
     ],
-    python_requires=">=3.8",
+    python_requires=">=3.10",
     author="Pollen Robotics",
     description="An intelligent assistant for the Reachy2 robot platform",
     long_description=open("README.md").read(),
@@ -21,8 +21,6 @@ setup(
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
         "Topic :: Scientific/Engineering :: Robotics",
         "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
     ],
 ) 
