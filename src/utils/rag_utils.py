@@ -239,7 +239,7 @@ Guidelines:
 - Use type hints when helpful
 
 Vision-Specific Requirements (ONLY for vision-related queries involving camera, object detection, or tracking):
-1. First, remind users to install pollen-vision: `pip install pollen-vision`
+1. First, remind users to pip install pollen-vision: `pip install git+https://github.com/pollen-robotics/pollen-vision.git`
 2. Include these specific vision imports:
    ```python
    from pollen_vision.camera_wrappers.pollen_sdk_camera.pollen_sdk_camera_wrapper import PollenSDKCameraWrapper
@@ -591,63 +591,3 @@ class RAGPipeline:
         except Exception as e:
             print(f"Error processing query: {str(e)}")
             return f"I apologize, but I encountered an error while processing your query: {str(e)}"
-
-
-class VectorStore:
-    """Vector store wrapper for document storage and retrieval."""
-
-    # Collection-specific search instructions for better embeddings
-    COLLECTION_INSTRUCTIONS = {
-        "api_docs_functions": "Represent this function documentation for retrieving relevant Python API methods and functions",
-        "api_docs_classes": "Represent this class documentation for retrieving relevant Python classes and their capabilities",
-        "reachy2_tutorials": "Represent this tutorial content for retrieving relevant robot programming examples and explanations",
-        "reachy2_sdk": "Represent this SDK documentation for retrieving relevant robot control and programming information",
-        "reachy2_docs": "Represent this documentation for retrieving relevant information about Reachy 2's features, capabilities, and usage",
-    }
-
-    def __init__(self, persist_directory: str = "data/vectorstore"):
-        """Initialize the vector store with persistence."""
-        self.persist_directory = persist_directory
-
-        # Create a temporary directory for the database
-        self.temp_dir = tempfile.mkdtemp()
-        print(f"Using temporary directory: {self.temp_dir}")
-
-        # Initialize client with temporary directory and settings to reduce output
-        settings = chromadb.Settings(
-            anonymized_telemetry=False, allow_reset=True, is_persistent=True
-        )
-
-        self.client = chromadb.PersistentClient(path=self.temp_dir, settings=settings)
-
-        # If the persist directory exists, try to copy its contents
-        if os.path.exists(persist_directory):
-            try:
-                shutil.copytree(persist_directory, self.temp_dir, dirs_exist_ok=True)
-                print(f"Copied existing database from {persist_directory}")
-            except Exception as e:
-                print(f"Warning: Could not copy existing database: {e}")
-
-    def query_collection(
-        self,
-        collection_name: str,
-        query_texts: List[str],
-        n_results: int = 5,
-        embedding_function: Callable = None,
-    ) -> Dict:
-        """Query a collection with collection-specific embedding instructions."""
-        collection = self.client.get_collection(
-            name=collection_name, embedding_function=embedding_function
-        )
-
-        # Add collection-specific instruction to query
-        instruction = self.COLLECTION_INSTRUCTIONS.get(collection_name, "")
-        if instruction:
-            query_texts = [f"{instruction}:\n{text}" for text in query_texts]
-
-        # Only include necessary data in the query
-        return collection.query(
-            query_texts=query_texts,
-            n_results=n_results,
-            include=["documents", "distances"],
-        )
