@@ -2,7 +2,9 @@
 
 An intelligent assistant for the Reachy2 robot platform that provides accurate, context-aware responses about robot control and programming.
 
-![Reachy2 Expert Agent Demo](assets/demo.gif)
+<div align="center">
+  <img src="assets/demo.gif" alt="Reachy2 Expert Agent Demo" width="800"/>
+</div>
 
 ## Features
 
