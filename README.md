@@ -2,6 +2,8 @@
 
 An intelligent assistant for the Reachy2 robot platform that provides accurate, context-aware responses about robot control and programming.
 
+![Reachy2 Expert Agent Demo](assets/demo.gif)
+
 ## Features
 
 - Context-aware responses using RAG (Retrieval-Augmented Generation)

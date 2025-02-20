@@ -361,19 +361,13 @@ def main():
 
     # Create a Gradio interface with default theme
     with gr.Blocks(
-        title="Reachy2 Expert Agent",
+        title="Reachy2 robot assistant",
         theme=gr.themes.Soft(),  # Using built-in Soft theme for clean look
     ) as iface:
         gr.Markdown(
             """
-        # Reachy2 Expert Agent
-        An intelligent assistant for the Reachy2 robot platform that:
-        - Provides accurate, context-aware responses about robot control and programming
-        - Shows real-time reasoning steps and code generation
-        - Maintains conversation context for follow-up questions
-        - Ensures safety guidelines are followed
-        - Includes necessary code imports and setup
-        - Can execute code on virtual Reachy (when simulation is running)
+        # Reachy2 robot assistant
+        An intelligent assistant for the Reachy2 robot platform that provides accurate, context-aware responses about robot control and programming.
         """
         )
 
@@ -414,17 +408,9 @@ def main():
                 safety_md = gr.Markdown(
                     """
                 - Always follow robot safety protocols
-                - Start with slow movements
                 - Monitor the robot's surroundings
                 - Keep emergency stop accessible
                 - Test in simulation when possible
-                
-                Vision System Safety:
-                - Ensure proper camera calibration
-                - Verify object detection accuracy
-                - Handle detection failures gracefully
-                - Maintain clear camera view
-                - Test vision functions before robot movement
                 """
                 )
 

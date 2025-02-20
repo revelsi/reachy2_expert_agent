@@ -55,6 +55,8 @@ data/vectorstore/*
 !data/vectorstore/.gitkeep
 data/cache/*
 !data/cache/.gitkeep
+.validation_config.json
+tools/.validation_config.json
 
 # Model files and caches
 .cache/
